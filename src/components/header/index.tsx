@@ -1,13 +1,18 @@
-import { Form, Input, Modal, Upload } from "antd";
+import { Form, Input, message, Modal, Upload } from "antd";
 import "./index.scss";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "antd/es/form/Form";
 import FormItem from "antd/es/form/FormItem";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import logo from "../../assets/images/logo.png";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Header() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenSignUp, setIsOpenSignUp] = useState(false);
+  const [isOpenLogin, setIsOpenLogin] = useState(false);
+
   const [form] = useForm();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState();
@@ -62,34 +67,45 @@ function Header() {
     </button>
   );
 
+  const handleCloseSignUp = () => {
+    form.resetFields();
+    setIsOpenSignUp(false);
+  };
+
+  const handleCloseLogin = () => {
+    form.resetFields();
+    setIsOpenLogin(false);
+  };
+
   return (
     <div className="header">
       <div className="header__left">
-        <ul>
-          <li>
-            <Link to="">Home</Link>
-          </li>
-          <li>
-            <Link to="/tung">Meomeo</Link>
-          </li>
-        </ul>
+        <Link to="">
+          <img src={logo} alt="" />
+        </Link>
       </div>
       <div className="header__right">
         <button
           onClick={() => {
-            setIsOpen(true);
+            setIsOpenLogin(true);
           }}
         >
-          Sign in
+          Log in
         </button>
-        <button>Sign up</button>
+        <button
+          onClick={() => {
+            setIsOpenSignUp(true);
+          }}
+        >
+          Sign up
+        </button>
       </div>
 
       <Modal
-        open={isOpen}
-        title="Sign in"
-        onCancel={() => setIsOpen(false)}
-        onClose={() => setIsOpen(false)}
+        open={isOpenSignUp}
+        title="Sign Up"
+        onCancel={handleCloseSignUp}
+        onClose={handleCloseSignUp}
       >
         <Form
           form={form}
@@ -163,7 +179,16 @@ function Header() {
           >
             <Input.Password />
           </FormItem>
-          <FormItem name="bio" label="Bio">
+          <FormItem
+            name="bio"
+            label="Bio"
+            rules={[
+              {
+                required: true,
+                message: "Please input your bio",
+              },
+            ]}
+          >
             <Input.TextArea rows={5} />
           </FormItem>
           <FormItem name="avatar" label="Avatar">
@@ -188,6 +213,45 @@ function Header() {
                 uploadButton
               )}
             </Upload>
+          </FormItem>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Login"
+        open={isOpenLogin}
+        onCancel={handleCloseLogin}
+        onClose={handleCloseLogin}
+      >
+        <Form form={form} labelCol={{ span: 24 }}>
+          <FormItem
+            name="email"
+            label="Email"
+            rules={[
+              {
+                type: "email",
+                message: "Please input your valid email",
+              },
+              {
+                required: true,
+                message: "Please input your email",
+              },
+            ]}
+          >
+            <Input />
+          </FormItem>
+          <FormItem
+            name="password"
+            label="Password"
+            rules={[
+              {
+                required: true,
+                message: "Please input your password",
+              },
+            ]}
+            hasFeedback
+          >
+            <Input.Password />
           </FormItem>
         </Form>
       </Modal>

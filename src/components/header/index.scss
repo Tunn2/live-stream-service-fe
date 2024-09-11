@@ -7,16 +7,22 @@
   padding: 20px 100px;
 
   &__left {
-    ul {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      list-style: none;
-      gap: 20px;
-      a {
-        text-decoration: none;
-        color: #fff;
-      }
+    // ul {
+    //   display: flex;
+    //   align-items: center;
+    //   justify-content: center;
+    //   list-style: none;
+    //   gap: 20px;
+    //   a {
+    //     text-decoration: none;
+    //     color: #fff;
+    //   }
+    // }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    img {
+      width: 50px;
     }
   }
 
