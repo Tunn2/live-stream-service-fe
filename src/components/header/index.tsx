@@ -71,16 +71,37 @@ function Header() {
   };
 
   const handleSubmitForm = async (value) => {
+    // Create a FormData object to handle file uploads
+    const formData = new FormData();
+
+    // Append regular form fields
+    Object.keys(value).forEach((key) => {
+      formData.append(key, value[key]);
+    });
+
+    // Append the file to the FormData object
+    if (fileList.length > 0) {
+      formData.append("avatar", fileList[0].originFileObj);
+    }
+
     let response = null;
     try {
-      response = await axios.post("http://localhost:4000/api/upload", value);
-      const token = response.data.accessToken;
+      response = await axios.post(
+        "http://localhost:4000/api/auth/signup",
+        formData, // Pass the FormData object instead of value
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const token = response.data?.accessToken;
       localStorage.setItem("token", token);
       const result = jwtDecode(token);
       console.log(result);
     } catch (error: any) {
       console.log(error);
-      toast.error(error.response.data.error);
+      toast.error(error.response?.data.error);
     }
 
     handleCloseSignUp();
