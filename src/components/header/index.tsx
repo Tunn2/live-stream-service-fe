@@ -407,6 +407,9 @@ function Header() {
           labelCol={{ span: 24 }}
           encType="multipart/form-data"
         >
+          <FormItem name="email" hidden>
+            <Input value={user?.email} />
+          </FormItem>
           <FormItem name="title" label="Title">
             <Input />
           </FormItem>

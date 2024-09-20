@@ -12,10 +12,11 @@ import {
   Col,
   Badge,
   Skeleton,
+  Modal,
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import Hls from "hls.js";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LikeButton from "../../components/like-button";
 import ShareButton from "../../components/share-button";
 import { useSelector } from "react-redux";
@@ -37,8 +38,10 @@ const LiveStream = () => {
   const [viewersCount, setViewersCount] = useState(0);
   const messageEndRef = useRef(null);
   const [stream, setStream] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isOpenStop, setIsOpenStop] = useState(false);
 
+  const navigate = useNavigate();
   useEffect(() => {
     // Tham gia vào room theo roomId
     socket.emit("join_room", roomId);
@@ -69,32 +72,32 @@ const LiveStream = () => {
     handleGetStream(roomId);
   }, []);
 
-  const startStream = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoRef.current.srcObject = stream;
+  // const startStream = async () => {
+  //   try {
+  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  //     videoRef.current.srcObject = stream;
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "video/webm",
-      });
+  //     const mediaRecorder = new MediaRecorder(stream, {
+  //       mimeType: "video/webm",
+  //     });
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const arrayBuffer = reader.result;
-            socket.emit("video_chunk", arrayBuffer);
-          };
-          reader.readAsArrayBuffer(event.data);
-        }
-      };
+  //     mediaRecorder.ondataavailable = (event) => {
+  //       if (event.data.size > 0) {
+  //         const reader = new FileReader();
+  //         reader.onloadend = () => {
+  //           const arrayBuffer = reader.result;
+  //           socket.emit("video_chunk", arrayBuffer);
+  //         };
+  //         reader.readAsArrayBuffer(event.data);
+  //       }
+  //     };
 
-      mediaRecorder.start(1000);
-      setStreaming(true);
-    } catch (error) {
-      console.error("Error starting stream:", error);
-    }
-  };
+  //     mediaRecorder.start(1000);
+  //     setStreaming(true);
+  //   } catch (error) {
+  //     console.error("Error starting stream:", error);
+  //   }
+  // };
 
   const stopStream = () => {
     setStreaming(false);
@@ -130,26 +133,39 @@ const LiveStream = () => {
     }
   };
 
-  const loadLiveStream = () => {
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(
-        "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8"
-      );
-      hls.attachMedia(liveVideoRef.current);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        liveVideoRef.current.play();
-        setLoading(false);
-      });
-    } else if (
-      liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")
-    ) {
-      liveVideoRef.current.src =
-        "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8";
-      liveVideoRef.current.play();
+  const handleStopStream = async () => {
+    setIsOpenStop(true);
+    setLoading(true);
+    try {
+      const response = await api.post(`streams/end/${roomId}`);
       setLoading(false);
+      toast.success("Stop stream successfully");
+      navigate("/");
+    } catch (error) {
+      console.log(error);
     }
   };
+
+  // const loadLiveStream = () => {
+  //   if (Hls.isSupported()) {
+  //     const hls = new Hls();
+  //     hls.loadSource(
+  //       "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8"
+  //     );
+  //     hls.attachMedia(liveVideoRef.current);
+  //     hls.on(Hls.Events.MANIFEST_PARSED, () => {
+  //       liveVideoRef.current.play();
+  //       setLoading(false);
+  //     });
+  //   } else if (
+  //     liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")
+  //   ) {
+  //     liveVideoRef.current.src =
+  //       "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8";
+  //     liveVideoRef.current.play();
+  //     setLoading(false);
+  //   }
+  // };
 
   // useEffect(() => {
   //   loadLiveStream();
@@ -175,7 +191,7 @@ const LiveStream = () => {
                 }}
               >
                 <video
-                  ref={videoRef}
+                  ref={stream?.streamUrl}
                   autoPlay
                   muted
                   style={{
@@ -186,24 +202,34 @@ const LiveStream = () => {
                   }}
                 />
                 <div style={{ marginTop: "16px", textAlign: "center" }}>
-                  {streaming ? (
-                    <Button
-                      type="danger"
-                      onClick={stopStream}
-                      style={{ width: "100%" }}
-                    >
-                      Stop Stream
-                    </Button>
-                  ) : (
-                    <Button
-                      type="primary"
-                      onClick={startStream}
-                      style={{ width: "100%" }}
-                      danger
-                    >
-                      Stop Stream
-                    </Button>
-                  )}
+                  <Button
+                    type="primary"
+                    onClick={() => setIsOpenStop(true)}
+                    style={{ width: "100%" }}
+                    danger
+                  >
+                    Stop Stream
+                  </Button>
+                  <Modal
+                    open={isOpenStop}
+                    title="Do you want to stop?"
+                    onCancel={() => setIsOpenStop(false)}
+                    footer={
+                      <>
+                        <Button onClick={() => setIsOpenStop(false)}>No</Button>
+                        <Button
+                          type="primary"
+                          danger
+                          onClick={() => handleStopStream()}
+                          loading={loading}
+                        >
+                          Yes
+                        </Button>
+                      </>
+                    }
+                  >
+                    This action will stop your stream
+                  </Modal>
                 </div>
               </Card>
             </Col>
