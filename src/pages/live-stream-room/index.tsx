@@ -30,14 +30,12 @@ const socket = io("http://localhost:4000");
 const LiveStream = () => {
   const user = useSelector((store) => store.user);
   const { id: roomId } = useParams();
-  const videoRef = useRef(null);
   const liveVideoRef = useRef(null);
-  const [streaming, setStreaming] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [viewersCount, setViewersCount] = useState(0);
   const messageEndRef = useRef(null);
-  const [stream, setStream] = useState(false);
+  const [stream, setStream] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpenStop, setIsOpenStop] = useState(false);
 
@@ -63,50 +61,21 @@ const LiveStream = () => {
       socket.off("new_message");
     };
   }, [roomId]);
-  const handleGetStream = async (id) => {
-    const response = await api.get(`streams/${id}`);
-    setStream(response.data.data);
-  };
+
+  const handleGetStream = async () => {
+    try {
+      const response = await api.get(`streams/${roomId}`);
+      setStream(response.data.data);
+      console.log(stream)
+    } catch (error) {
+      console.error("Failed to fetch stream:", error);
+      toast.error("Could not load the stream.");
+    }
+  };    
 
   useEffect(() => {
-    handleGetStream(roomId);
+    handleGetStream();
   }, []);
-
-  // const startStream = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  //     videoRef.current.srcObject = stream;
-
-  //     const mediaRecorder = new MediaRecorder(stream, {
-  //       mimeType: "video/webm",
-  //     });
-
-  //     mediaRecorder.ondataavailable = (event) => {
-  //       if (event.data.size > 0) {
-  //         const reader = new FileReader();
-  //         reader.onloadend = () => {
-  //           const arrayBuffer = reader.result;
-  //           socket.emit("video_chunk", arrayBuffer);
-  //         };
-  //         reader.readAsArrayBuffer(event.data);
-  //       }
-  //     };
-
-  //     mediaRecorder.start(1000);
-  //     setStreaming(true);
-  //   } catch (error) {
-  //     console.error("Error starting stream:", error);
-  //   }
-  // };
-
-  const stopStream = () => {
-    setStreaming(false);
-    socket.emit("disconnect");
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
-    videoRef.current.srcObject = null;
-  };
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -116,7 +85,7 @@ const LiveStream = () => {
 
   const sendMessage = () => {
     try {
-      if (message.trim()) {
+      if (message?.trim()) {
         const newMessage = {
           text: message,
           sender: "You", // Replace with the actual sender name if needed
@@ -146,40 +115,54 @@ const LiveStream = () => {
     }
   };
 
-  // const loadLiveStream = () => {
-  //   if (Hls.isSupported()) {
-  //     const hls = new Hls();
-  //     hls.loadSource(
-  //       "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8"
-  //     );
-  //     hls.attachMedia(liveVideoRef.current);
-  //     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-  //       liveVideoRef.current.play();
-  //       setLoading(false);
-  //     });
-  //   } else if (
-  //     liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")
-  //   ) {
-  //     liveVideoRef.current.src =
-  //       "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8";
-  //     liveVideoRef.current.play();
-  //     setLoading(false);
-  //   }
-  // };
+  const loadLiveStream = () => {
+    if (!stream || !stream.streamUrl) {
+      console.error("Stream URL is not available.");
+      return;
+    }
+  
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(stream.streamUrl);
+      hls.attachMedia(liveVideoRef.current);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        liveVideoRef.current.play();
+        setLoading(false);
+      });
+    } else if (liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+      liveVideoRef.current.src = stream.streamUrl;
+      liveVideoRef.current.play();
+      setLoading(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   loadLiveStream();
-  //   const interval = setInterval(() => {
-  //     loadLiveStream();
-  //   }, 30000);
-  //   return () => clearInterval(interval);
-  // }, []);
+  const saveStream = async () => {
+    try {
+      const response = await api.post(`/streams/save/${roomId}`);
+      console.log("Stream saved:", response.data);
+    } catch (error) {
+      console.error("Failed to save stream:", error?.response || error);
+    }
+  };  
+  
+  useEffect(() => {
+    if (stream) {
+      loadLiveStream();
+      saveStream();
+
+      const interval = setInterval(() => {
+        loadLiveStream();
+        saveStream();
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [stream]);
 
   return (
     <div style={{ padding: "24px", backgroundColor: "#f0f2f5" }}>
       <Row gutter={[24, 24]}>
         {/* Camera Stream Section */}
-        {user?._id == stream.userId ? (
+        {user?._id == stream?.userId ? (
           <>
             <Col xs={24} sm={24} md={12}>
               <Card
@@ -191,7 +174,7 @@ const LiveStream = () => {
                 }}
               >
                 <video
-                  ref={stream?.streamUrl}
+                  ref={liveVideoRef}
                   autoPlay
                   muted
                   style={{
@@ -276,7 +259,7 @@ const LiveStream = () => {
             </Badge>
           </Card>
           <Title level={4} style={{ textAlign: "center", marginTop: "12px" }}>
-            {stream.title}
+            {stream?.title}
           </Title>
         </Col>
       </Row>
