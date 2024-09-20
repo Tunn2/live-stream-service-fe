@@ -1,23 +1,72 @@
 import React, { useRef, useState, useEffect } from "react";
 import io from "socket.io-client";
+import {
+  Card,
+  Button,
+  Form,
+  Input,
+  List,
+  Avatar,
+  Typography,
+  Row,
+  Col,
+  Badge,
+  Skeleton,
+} from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import Hls from "hls.js";
+import { useParams } from "react-router-dom";
+import LikeButton from "../../components/like-button";
+import ShareButton from "../../components/share-button";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import api from "../../configs/axios";
+import Title from "antd/es/typography/Title";
 
-const socket = io("http://localhost:4000"); // Adjust the URL if needed
+const { Text } = Typography;
+const socket = io("http://localhost:4000");
 
 const LiveStream = () => {
+  const user = useSelector((store) => store.user);
+  const { id: roomId } = useParams();
   const videoRef = useRef(null);
+  const liveVideoRef = useRef(null);
   const [streaming, setStreaming] = useState(false);
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [viewersCount, setViewersCount] = useState(0);
+  const messageEndRef = useRef(null);
+  const [stream, setStream] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for incoming comments
-    socket.on("new_comment", (newComment) => {
-      setComments((prevComments) => [...prevComments, newComment]);
+    // Tham gia vào room theo roomId
+    socket.emit("join_room", roomId);
+
+    // Lắng nghe số lượng người xem
+    socket.on("viewers_count", (count) => {
+      setViewersCount(count);
+    });
+
+    // Lắng nghe tin nhắn mới trong room
+    socket.on("new_message", (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
     });
 
     return () => {
-      socket.off("new_comment");
+      // Khi rời khỏi room
+      socket.emit("leave_room", roomId);
+      socket.off("viewers_count");
+      socket.off("new_message");
     };
+  }, [roomId]);
+  const handleGetStream = async (id) => {
+    const response = await api.get(`streams/${id}`);
+    setStream(response.data.data);
+  };
+
+  useEffect(() => {
+    handleGetStream(roomId);
   }, []);
 
   const startStream = async () => {
@@ -40,7 +89,7 @@ const LiveStream = () => {
         }
       };
 
-      mediaRecorder.start(1000); // Send data every second
+      mediaRecorder.start(1000);
       setStreaming(true);
     } catch (error) {
       console.error("Error starting stream:", error);
@@ -49,81 +98,214 @@ const LiveStream = () => {
 
   const stopStream = () => {
     setStreaming(false);
-    socket.emit("disconnect"); // Disconnect the WebSocket connection
+    socket.emit("disconnect");
     const stream = videoRef.current.srcObject;
     const tracks = stream.getTracks();
     tracks.forEach((track) => track.stop());
     videoRef.current.srcObject = null;
   };
 
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (comment.trim()) {
-      const newComment = {
-        id: Date.now(),
-        text: comment,
-        sender: "You", // You can replace this with actual user identification if available
-      };
-      setComments((prevComments) => [...prevComments, newComment]); // Add comment locally
-      socket.emit("new_comment", newComment); // Send to server
-      setComment(""); // Clear input field
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]); // Re-run the effect when 'messages' changes
+
+  const sendMessage = () => {
+    try {
+      if (message.trim()) {
+        const newMessage = {
+          text: message,
+          sender: "You", // Replace with the actual sender name if needed
+        };
+        socket.emit("send_message", {
+          roomId,
+          message: newMessage,
+          userId: user._id,
+        });
+        setMessage(""); // Clear input field
+      }
+    } catch (error) {
+      toast.error("Please sign in");
     }
   };
 
+  const loadLiveStream = () => {
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(
+        "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8"
+      );
+      hls.attachMedia(liveVideoRef.current);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        liveVideoRef.current.play();
+        setLoading(false);
+      });
+    } else if (
+      liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")
+    ) {
+      liveVideoRef.current.src =
+        "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8";
+      liveVideoRef.current.play();
+      setLoading(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   loadLiveStream();
+  //   const interval = setInterval(() => {
+  //     loadLiveStream();
+  //   }, 30000);
+  //   return () => clearInterval(interval);
+  // }, []);
+
   return (
-    <div className="flex">
-      <div className="w-1/2 p-4">
-        <h3 className="text-xl font-bold mb-4">Camera Stream</h3>
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          className="w-full h-auto border-2 border-black mb-4"
-        ></video>
-        <div>
-          {streaming ? (
-            <button
-              onClick={stopStream}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Stop Stream
-            </button>
-          ) : (
-            <button
-              onClick={startStream}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Start Stream
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="w-1/2 p-4">
-        <h3 className="text-xl font-bold mb-4">Comments</h3>
-        <div className="h-64 overflow-y-auto border p-2 mb-4">
-          {comments.map((c) => (
-            <div key={c.id} className="mb-2">
-              <strong>{c.sender}: </strong>
-              {c.text}
-            </div>
-          ))}
-        </div>
-        <form onSubmit={handleCommentSubmit} className="flex">
-          <input
-            type="text"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Enter your comment"
-            className="flex-grow border p-2 mr-2"
-          />
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+    <div style={{ padding: "24px", backgroundColor: "#f0f2f5" }}>
+      <Row gutter={[24, 24]}>
+        {/* Camera Stream Section */}
+        {user?._id == stream.userId ? (
+          <>
+            <Col xs={24} sm={24} md={12}>
+              <Card
+                title="Camera Stream"
+                bordered={false}
+                style={{
+                  marginBottom: "24px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                  }}
+                />
+                <div style={{ marginTop: "16px", textAlign: "center" }}>
+                  {streaming ? (
+                    <Button
+                      type="danger"
+                      onClick={stopStream}
+                      style={{ width: "100%" }}
+                    >
+                      Stop Stream
+                    </Button>
+                  ) : (
+                    <Button
+                      type="primary"
+                      onClick={startStream}
+                      style={{ width: "100%" }}
+                      danger
+                    >
+                      Stop Stream
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            </Col>
+          </>
+        ) : (
+          <></>
+        )}
+
+        {/* Live Stream Section */}
+        <Col xs={24}>
+          <Card
+            title="Live Stream"
+            bordered={false}
+            style={{
+              marginBottom: "24px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            }}
           >
-            Send
-          </button>
-        </form>
-      </div>
+            {loading ? (
+              <Skeleton active />
+            ) : (
+              <video
+                ref={liveVideoRef}
+                autoPlay
+                style={{
+                  width: "100%",
+                  maxWidth: "720px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                }}
+              />
+            )}
+            <Badge
+              count={viewersCount}
+              style={{
+                backgroundColor: "#52c41a",
+                marginTop: "12px",
+                marginRight: "-28px",
+                textAlign: "center",
+                width: "100%",
+              }}
+            >
+              <Text type="secondary">Viewers</Text>
+            </Badge>
+          </Card>
+          <Title level={4} style={{ textAlign: "center", marginTop: "12px" }}>
+            {stream.title}
+          </Title>
+        </Col>
+      </Row>
+
+      {/* Comments Section */}
+      <Card
+        title="Comments"
+        bordered={false}
+        style={{
+          marginBottom: "24px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <List
+          dataSource={messages}
+          renderItem={(item) => (
+            <List.Item key={item.id} ref={messageEndRef}>
+              <List.Item.Meta
+                avatar={<Avatar icon={<UserOutlined />} />}
+                title={<Text strong>{item.sender}:</Text>}
+                description={item.text}
+              />
+            </List.Item>
+          )}
+          style={{ marginBottom: "16px", height: "300px", overflowY: "scroll" }}
+        />
+
+        <Form onFinish={sendMessage} layout="inline" style={{ width: "100%" }}>
+          <Form.Item style={{ flexGrow: 1 }}>
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Nhập tin nhắn"
+              onPressEnter={sendMessage} // Nhấn Enter để gửi tin nhắn
+              style={{ marginBottom: "10px" }}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Send
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <div
+          style={{
+            marginTop: "16px",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* <LikeButton isLiked={like} /> */}
+          <ShareButton />
+        </div>
+      </Card>
     </div>
   );
 };

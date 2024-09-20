@@ -1,17 +1,22 @@
-import { Button, Form, Image, Input, Modal, Upload } from "antd";
+import { Button, Form, Image, Input, Modal, Select, Upload } from "antd";
 import "./index.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "antd/es/form/Form";
 import FormItem from "antd/es/form/FormItem";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import logo from "../../assets/images/logo.png";
+import {
+  LoadingOutlined,
+  PlusOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
+import logo from "../../img/logo-color.png";
 import "react-toastify/dist/ReactToastify.css";
-import handleFileUpload from "../../utils/upload";
 import axios from "axios";
-import api from "../../configs/axios";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
+import api from "../../configs/axios";
+import { login, logout } from "../../redux/features/userSlice";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -24,12 +29,17 @@ const getBase64 = (file) =>
 function Header() {
   const [isOpenSignUp, setIsOpenSignUp] = useState(false);
   const [isOpenLogin, setIsOpenLogin] = useState(false);
-
+  const [isOpenLive, setIsOpenLive] = useState(false);
   const [form] = useForm();
+  const [loginForm] = useForm();
+  const [liveForm] = useForm();
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
+  const user = useSelector((store) => store.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -66,15 +76,35 @@ function Header() {
   };
 
   const handleCloseLogin = () => {
-    form.resetFields();
+    loginForm.resetFields();
     setIsOpenLogin(false);
   };
 
-  const handleSubmitForm = async (value) => {
-    // Create a FormData object to handle file uploads
-    const formData = new FormData();
+  const handleCloseCreateStream = () => {
+    liveForm.resetFields();
+    setIsOpenLive(false);
+  };
 
-    // Append regular form fields
+  const handleLoginForm = async (value) => {
+    let response = null;
+    try {
+      response = await api.post("auth/login", value);
+      const token = response.data?.accessToken;
+      localStorage.setItem("token", token);
+      const { _id } = jwtDecode(token);
+      const result = await api.get(`users/${_id}`);
+      const { password, createdAt, updatedAt, isActive, ...user } =
+        result.data.data;
+      dispatch(login(user));
+      handleCloseLogin();
+    } catch (error) {
+      toast.error("Email or password is incorrect");
+    }
+  };
+
+  const handleSubmitForm = async (value) => {
+    let response = null;
+    const formData = new FormData();
     Object.keys(value).forEach((key) => {
       formData.append(key, value[key]);
     });
@@ -84,60 +114,61 @@ function Header() {
       formData.append("avatar", fileList[0].originFileObj);
     }
 
-    let response = null;
     try {
       response = await axios.post(
         "http://localhost:4000/api/auth/signup",
-        formData, // Pass the FormData object instead of value
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         }
       );
-      const token = response.data?.accessToken;
-      localStorage.setItem("token", token);
-      const result = jwtDecode(token);
-      console.log(result);
+      setFileList([]);
+      toast.success("Sign up successfully");
     } catch (error: any) {
       console.log(error);
       toast.error(error.response?.data.error);
     }
-
     handleCloseSignUp();
   };
 
-  // Function to handle the file upload
-  // const handleUpload = async (file) => {
-  //   setLoading(true);
+  const handleLiveForm = async (value) => {
+    setLoading(true);
+    let response = null;
+    const formData = new FormData();
+    Object.keys(value).forEach((key) => {
+      formData.append(key, value[key]);
+    });
+    if (fileList.length > 0) {
+      formData.append("thumbnail", fileList[0].originFileObj);
+    }
+    formData.append("userId", user._id);
+    try {
+      response = await axios.post(
+        "http://localhost:4000/api/streams/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setFileList([]);
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.response?.data.error);
+    }
+    setLoading(false);
+    handleCloseCreateStream();
+    const stream = response?.data.data;
+    navigate(`room/${stream._id}`);
+  };
 
-  //   const uniqueFileName = `${Date.now()}-${file.name}`; // Generate a unique file name
-
-  //   try {
-  //     // Upload to BunnyCDN
-  //     const response = await axios.put(
-  //       `https://storage.bunnycdn.com/live-stream-service/${uniqueFileName}`,
-  //       file,
-  //       {
-  //         headers: {
-  //           AccessKey: "e68740b8-e7b2-4df2-82b616b8ab35-77e2-42d6", // Replace with your actual access key
-  //           "Content-Type": file.type, // The file's MIME type
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 201) {
-  //       console.log("File uploaded successfully:", response);
-  //       return `https://live-stream-service.b-cdn.net/${uniqueFileName}`; // Your CDN URL for the file
-  //     } else {
-  //       console.error("Failed to upload the file");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error uploading the file:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("token");
+  };
 
   return (
     <div className="header">
@@ -147,20 +178,25 @@ function Header() {
         </Link>
       </div>
       <div className="header__right">
-        <button
-          onClick={() => {
-            setIsOpenLogin(true);
-          }}
-        >
-          Log in
-        </button>
-        <button
-          onClick={() => {
-            setIsOpenSignUp(true);
-          }}
-        >
-          Sign up
-        </button>
+        {user === null ? (
+          <>
+            <button
+              onClick={() => {
+                setIsOpenLogin(true);
+              }}
+            >
+              Log in
+            </button>
+            <button onClick={() => setIsOpenSignUp(true)}>Sign up</button>
+          </>
+        ) : (
+          <>
+            <button style={{ width: 76 }} onClick={() => setIsOpenLive(true)}>
+              <VideoCameraOutlined />
+            </button>
+            <button onClick={handleLogout}>Log out</button>
+          </>
+        )}
       </div>
 
       <Modal
@@ -183,8 +219,8 @@ function Header() {
       >
         <Form
           form={form}
-          labelCol={{ span: 24 }}
           onFinish={handleSubmitForm}
+          labelCol={{ span: 24 }}
           encType="multipart/form-data"
         >
           <FormItem
@@ -266,7 +302,6 @@ function Header() {
           </FormItem>
           <FormItem name="avatar" label="Avatar">
             <Upload
-              // action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
               onPreview={handlePreview}
@@ -297,8 +332,25 @@ function Header() {
         open={isOpenLogin}
         onCancel={handleCloseLogin}
         onClose={handleCloseLogin}
+        footer={
+          <>
+            <Button
+              type="primary"
+              onClick={() => {
+                loginForm.submit();
+              }}
+            >
+              Login
+            </Button>
+          </>
+        }
       >
-        <Form form={form} labelCol={{ span: 24 }}>
+        <Form
+          form={loginForm}
+          onFinish={handleLoginForm}
+          labelCol={{ span: 24 }}
+        >
+          <Form.Item name="login" hidden></Form.Item>
           <FormItem
             name="email"
             label="Email"
@@ -327,6 +379,72 @@ function Header() {
             hasFeedback
           >
             <Input.Password />
+          </FormItem>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={isOpenLive}
+        title="Create a live"
+        onCancel={() => setIsOpenLive(false)}
+        footer={
+          <>
+            <Button
+              type="primary"
+              onClick={() => {
+                liveForm.submit();
+              }}
+              loading={loading}
+            >
+              Go Live
+            </Button>
+          </>
+        }
+      >
+        <Form
+          form={liveForm}
+          onFinish={handleLiveForm}
+          labelCol={{ span: 24 }}
+          encType="multipart/form-data"
+        >
+          <FormItem name="title" label="Title">
+            <Input />
+          </FormItem>
+          <FormItem name="description" label="Description">
+            <Input />
+          </FormItem>
+          <FormItem name="categories" label="Category">
+            <Select
+              options={[
+                {
+                  label: "LOL",
+                  value: "lol",
+                },
+                {
+                  label: "PUBG",
+                  value: "pubg",
+                },
+                {
+                  label: "CSGO",
+                  value: "csgo",
+                },
+                {
+                  label: "Valorant",
+                  value: "valorant",
+                },
+              ]}
+            />
+          </FormItem>
+          <FormItem name="thumbnail" label="Thumbnail">
+            <Upload
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreview}
+              onChange={handleChange}
+              maxCount={1}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
           </FormItem>
         </Form>
       </Modal>
