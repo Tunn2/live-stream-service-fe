@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Layout,
   Typography,
@@ -10,6 +11,7 @@ import {
   Input,
   Button,
 } from "antd";
+import axios from "axios"; // Import axios for making the API call
 import stream from "../../../src/img/stream.jpg";
 import stream1 from "../../../src/img/stream2.jpg";
 import stream2 from "../../../src/img/stream3.jpg";
@@ -18,29 +20,12 @@ import lienminhImg from "../../../src/img/lienminh.jpg";
 import pubgImg from "../../../src/img/pubg.jpg";
 import avatarImg from "../../../src/img/avarta.jpg";
 import gtaImg from "../../../src/img/gta.jpg";
+import api from "../../configs/axios";
 
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 const { Meta } = Card;
 const { TextArea } = Input;
-
-const streams = [
-  {
-    title: "IShowSpeed",
-    image: stream1,
-    description: "IShowSpeed here",
-  },
-  {
-    title: "IShowSpeed",
-    image: stream2,
-    description: "IShowSpeed plays new game",
-  },
-  {
-    title: "IShowSpeed",
-    image: stream3,
-    description: "IShowSpeed duo",
-  },
-];
 
 const categories = [
   { name: "Liên Minh", image: lienminhImg },
@@ -50,6 +35,22 @@ const categories = [
 ];
 
 const HomePage = () => {
+  const [streams, setStreams] = useState([]);
+
+  // Fetch live streams when the component mounts
+  useEffect(() => {
+    const fetchStreams = async () => {
+      try {
+        const response = await api.get("http://localhost:4000/api/streams?isStreaming=true");
+        setStreams(response.data.data); // Assuming the API response returns an array of streams
+      } catch (error) {
+        console.error("Error fetching streams:", error);
+      }
+    };
+
+    fetchStreams();
+  }, []);
+
   return (
     <Layout style={{ padding: "20px", gap: "20px" }}>
       {/* Categories Section */}
@@ -99,22 +100,26 @@ const HomePage = () => {
             Featured Streams
           </Title>
           <Row gutter={[16, 16]}>
-            {streams.map((stream, index) => (
-              <Col xs={24} sm={12} md={8} key={index}>
-                <Card
-                  hoverable
-                  cover={
-                    <img
-                      alt={stream.title}
-                      src={stream.image}
-                      style={{ height: "200px", borderRadius: "8px" }}
-                    />
-                  }
-                >
-                  <Meta title={stream.title} description={stream.description} />
-                </Card>
-              </Col>
-            ))}
+            {streams.length > 0 ? (
+              streams.map((stream, index) => (
+                <Col xs={24} sm={12} md={8} key={index}>
+                  <Card
+                    hoverable
+                    cover={
+                      <img
+                        alt={stream.title}
+                        src={stream.image} // Assuming each stream has an image URL
+                        style={{ height: "200px", borderRadius: "8px" }}
+                      />
+                    }
+                  >
+                    <Meta title={stream.title} description={stream.description} />
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              <Text>No streams available</Text>
+            )}
           </Row>
         </Content>
       </Layout>
