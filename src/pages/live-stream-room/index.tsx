@@ -30,14 +30,12 @@ const socket = io("http://localhost:4000");
 const LiveStream = () => {
   const user = useSelector((store) => store.user);
   const { id: roomId } = useParams();
-  const videoRef = useRef(null);
   const liveVideoRef = useRef(null);
-  const [streaming, setStreaming] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [viewersCount, setViewersCount] = useState(0);
   const messageEndRef = useRef(null);
-  const [stream, setStream] = useState(false);
+  const [stream, setStream] = useState({});
   const [loading, setLoading] = useState(false);
   const [isOpenStop, setIsOpenStop] = useState(false);
 
@@ -63,13 +61,14 @@ const LiveStream = () => {
       socket.off("new_message");
     };
   }, [roomId]);
-  const handleGetStream = async (id) => {
-    const response = await api.get(`streams/${id}`);
+
+  const handleGetStream = async () => {
+    const response = await api.get(`streams/${roomId}`);
     setStream(response.data.data);
   };
 
   useEffect(() => {
-    handleGetStream(roomId);
+    handleGetStream();
   }, []);
 
   // const startStream = async () => {
@@ -99,14 +98,14 @@ const LiveStream = () => {
   //   }
   // };
 
-  const stopStream = () => {
-    setStreaming(false);
-    socket.emit("disconnect");
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
-    videoRef.current.srcObject = null;
-  };
+  // const stopStream = () => {
+  //   setStreaming(false);
+  //   socket.emit("disconnect");
+  //   const stream = videoRef.current.srcObject;
+  //   const tracks = stream.getTracks();
+  //   tracks.forEach((track) => track.stop());
+  //   videoRef.current.srcObject = null;
+  // };
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -146,34 +145,34 @@ const LiveStream = () => {
     }
   };
 
-  // const loadLiveStream = () => {
-  //   if (Hls.isSupported()) {
-  //     const hls = new Hls();
-  //     hls.loadSource(
-  //       "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8"
-  //     );
-  //     hls.attachMedia(liveVideoRef.current);
-  //     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-  //       liveVideoRef.current.play();
-  //       setLoading(false);
-  //     });
-  //   } else if (
-  //     liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")
-  //   ) {
-  //     liveVideoRef.current.src =
-  //       "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8";
-  //     liveVideoRef.current.play();
-  //     setLoading(false);
-  //   }
-  // };
+  const loadLiveStream = () => {
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(
+        "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8"
+      );
+      hls.attachMedia(liveVideoRef.current);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        liveVideoRef.current.play();
+        setLoading(false);
+      });
+    } else if (
+      liveVideoRef.current.canPlayType("application/vnd.apple.mpegurl")
+    ) {
+      liveVideoRef.current.src =
+        "https://live-stream-platform.b-cdn.net/video/user1/stream-result.m3u8";
+      liveVideoRef.current.play();
+      setLoading(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   loadLiveStream();
-  //   const interval = setInterval(() => {
-  //     loadLiveStream();
-  //   }, 30000);
-  //   return () => clearInterval(interval);
-  // }, []);
+  useEffect(() => {
+    loadLiveStream();
+    const interval = setInterval(() => {
+      loadLiveStream();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div style={{ padding: "24px", backgroundColor: "#f0f2f5" }}>

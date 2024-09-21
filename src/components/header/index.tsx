@@ -113,7 +113,6 @@ function Header() {
     if (fileList.length > 0) {
       formData.append("avatar", fileList[0].originFileObj);
     }
-
     try {
       response = await axios.post(
         "http://localhost:4000/api/auth/signup",
@@ -140,6 +139,8 @@ function Header() {
     Object.keys(value).forEach((key) => {
       formData.append(key, value[key]);
     });
+    console.log(user.email);
+    formData.append("email", user.email);
     if (fileList.length > 0) {
       formData.append("thumbnail", fileList[0].originFileObj);
     }
@@ -407,9 +408,6 @@ function Header() {
           labelCol={{ span: 24 }}
           encType="multipart/form-data"
         >
-          <FormItem name="email" hidden>
-            <Input value={user?.email} />
-          </FormItem>
           <FormItem name="title" label="Title">
             <Input />
           </FormItem>
