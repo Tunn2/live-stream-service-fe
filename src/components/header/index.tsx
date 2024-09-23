@@ -1,17 +1,30 @@
-import { Button, Form, Image, Input, Modal, Upload } from "antd";
+import {
+  Avatar,
+  Button,
+  Form,
+  Image,
+  Input,
+  Modal,
+  Select,
+  Upload,
+} from "antd";
 import "./index.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "antd/es/form/Form";
 import FormItem from "antd/es/form/FormItem";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import logo from "../../assets/images/logo.png";
+import {
+  LoadingOutlined,
+  PlusOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
+import logo from "../../img/logo-color.png";
 import "react-toastify/dist/ReactToastify.css";
-import handleFileUpload from "../../utils/upload";
 import axios from "axios";
-import api from "../../configs/axios";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/features/userSlice";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -22,14 +35,15 @@ const getBase64 = (file) =>
   });
 
 function Header() {
-  const [isOpenSignUp, setIsOpenSignUp] = useState(false);
-  const [isOpenLogin, setIsOpenLogin] = useState(false);
-
-  const [form] = useForm();
+  const [isOpenLive, setIsOpenLive] = useState(false);
+  const [liveForm] = useForm();
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
+  const user = useSelector((store) => store.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -60,213 +74,125 @@ function Header() {
     </button>
   );
 
-  const handleCloseSignUp = () => {
-    form.resetFields();
-    setIsOpenSignUp(false);
+  const handleCloseCreateStream = () => {
+    liveForm.resetFields();
+    setIsOpenLive(false);
   };
 
-  const handleCloseLogin = () => {
-    form.resetFields();
-    setIsOpenLogin(false);
-  };
-
-  const handleSubmitForm = async (value) => {
-    // Create a FormData object to handle file uploads
+  const handleLiveForm = async (value) => {
+    setLoading(true);
+    let response = null;
     const formData = new FormData();
-
-    // Append regular form fields
     Object.keys(value).forEach((key) => {
       formData.append(key, value[key]);
     });
-
-    // Append the file to the FormData object
+    console.log(user.email);
+    formData.append("email", user.email);
     if (fileList.length > 0) {
-      formData.append("avatar", fileList[0].originFileObj);
+      formData.append("thumbnail", fileList[0].originFileObj);
     }
-
-    let response = null;
+    formData.append("userId", user._id);
     try {
       response = await axios.post(
-        "http://localhost:4000/api/auth/signup",
-        formData, // Pass the FormData object instead of value
+        "http://localhost:4000/api/streams/",
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         }
       );
-      const token = response.data?.accessToken;
-      localStorage.setItem("token", token);
-      const result = jwtDecode(token);
-      console.log(result);
+      setFileList([]);
     } catch (error: any) {
       console.log(error);
       toast.error(error.response?.data.error);
     }
-
-    handleCloseSignUp();
+    setLoading(false);
+    handleCloseCreateStream();
+    const stream = response?.data.data;
+    navigate(`room/${stream._id}`);
   };
 
-  // Function to handle the file upload
-  // const handleUpload = async (file) => {
-  //   setLoading(true);
-
-  //   const uniqueFileName = `${Date.now()}-${file.name}`; // Generate a unique file name
-
-  //   try {
-  //     // Upload to BunnyCDN
-  //     const response = await axios.put(
-  //       `https://storage.bunnycdn.com/live-stream-service/${uniqueFileName}`,
-  //       file,
-  //       {
-  //         headers: {
-  //           AccessKey: "e68740b8-e7b2-4df2-82b616b8ab35-77e2-42d6", // Replace with your actual access key
-  //           "Content-Type": file.type, // The file's MIME type
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 201) {
-  //       console.log("File uploaded successfully:", response);
-  //       return `https://live-stream-service.b-cdn.net/${uniqueFileName}`; // Your CDN URL for the file
-  //     } else {
-  //       console.error("Failed to upload the file");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error uploading the file:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
   return (
     <div className="header">
       <div className="header__left">
-        <Link to="">
+        <Link to="/">
           <img src={logo} alt="" />
         </Link>
+        <button style={{ width: 76 }} onClick={() => setIsOpenLive(true)}>
+          <VideoCameraOutlined />
+        </button>
       </div>
       <div className="header__right">
-        <button
+        <Avatar
+          size={"large"}
+          icon={<UserOutlined />}
+          src={user?.avatarUrl}
           onClick={() => {
-            setIsOpenLogin(true);
+            navigate("/profile");
           }}
-        >
-          Log in
-        </button>
-        <button
-          onClick={() => {
-            setIsOpenSignUp(true);
-          }}
-        >
-          Sign up
-        </button>
+          style={{ cursor: "pointer" }}
+        />
+        <button onClick={handleLogout}>Log out</button>
       </div>
 
       <Modal
-        open={isOpenSignUp}
-        title="Sign Up"
-        onCancel={handleCloseSignUp}
-        onClose={handleCloseSignUp}
+        open={isOpenLive}
+        title="Create a live"
+        onCancel={() => setIsOpenLive(false)}
         footer={
           <>
             <Button
               type="primary"
               onClick={() => {
-                form.submit();
+                liveForm.submit();
               }}
+              loading={loading}
             >
-              Sign Up
+              Go Live
             </Button>
           </>
         }
       >
         <Form
-          form={form}
+          form={liveForm}
+          onFinish={handleLiveForm}
           labelCol={{ span: 24 }}
-          onFinish={handleSubmitForm}
           encType="multipart/form-data"
         >
-          <FormItem
-            name="email"
-            label="Email"
-            rules={[
-              {
-                type: "email",
-                message: "Please input your valid email",
-              },
-              {
-                required: true,
-                message: "Please input your email",
-              },
-            ]}
-          >
+          <FormItem name="title" label="Title">
             <Input />
           </FormItem>
-          <FormItem
-            name="username"
-            label="Username"
-            rules={[
-              {
-                required: true,
-                message: "Please input your username",
-              },
-            ]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your password",
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </FormItem>
-          <FormItem
-            name="confirmPassword"
-            label="Confirm Password"
-            dependencies={["password"]}
-            hasFeedback
-            rules={[
-              {
-                required: true,
-                message: "Please confirm your password",
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error("The two passwords do not match!")
-                  );
+          <FormItem name="categories" label="Category">
+            <Select
+              options={[
+                {
+                  label: "LOL",
+                  value: "lol",
                 },
-              }),
-            ]}
-          >
-            <Input.Password />
+                {
+                  label: "PUBG",
+                  value: "pubg",
+                },
+                {
+                  label: "CSGO",
+                  value: "csgo",
+                },
+                {
+                  label: "Valorant",
+                  value: "valorant",
+                },
+              ]}
+            />
           </FormItem>
-          <FormItem
-            name="bio"
-            label="Bio"
-            rules={[
-              {
-                required: true,
-                message: "Please input your bio",
-              },
-            ]}
-          >
-            <Input.TextArea rows={5} />
-          </FormItem>
-          <FormItem name="avatar" label="Avatar">
+          <FormItem name="thumbnail" label="Thumbnail">
             <Upload
-              // action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
               onPreview={handlePreview}
@@ -290,45 +216,6 @@ function Header() {
             src={previewImage}
           />
         )}
-      </Modal>
-
-      <Modal
-        title="Login"
-        open={isOpenLogin}
-        onCancel={handleCloseLogin}
-        onClose={handleCloseLogin}
-      >
-        <Form form={form} labelCol={{ span: 24 }}>
-          <FormItem
-            name="email"
-            label="Email"
-            rules={[
-              {
-                type: "email",
-                message: "Please input your valid email",
-              },
-              {
-                required: true,
-                message: "Please input your email",
-              },
-            ]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your password",
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </FormItem>
-        </Form>
       </Modal>
     </div>
   );
