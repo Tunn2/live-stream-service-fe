@@ -79,33 +79,6 @@ const LiveStream = () => {
     handleGetStream();
   }, []);
 
-  // const startStream = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  //     videoRef.current.srcObject = stream;
-
-  //     const mediaRecorder = new MediaRecorder(stream, {
-  //       mimeType: "video/webm",
-  //     });
-
-  //     mediaRecorder.ondataavailable = (event) => {
-  //       if (event.data.size > 0) {
-  //         const reader = new FileReader();
-  //         reader.onloadend = () => {
-  //           const arrayBuffer = reader.result;
-  //           socket.emit("video_chunk", arrayBuffer);
-  //         };
-  //         reader.readAsArrayBuffer(event.data);
-  //       }
-  //     };
-
-  //     mediaRecorder.start(1000);
-  //     setStreaming(true);
-  //   } catch (error) {
-  //     console.error("Error starting stream:", error);
-  //   }
-  // };
-
   const stopStream = () => {
     setStreaming(false);
     socket.emit("disconnect");
@@ -143,13 +116,15 @@ const LiveStream = () => {
   const handleStopStream = async () => {
     setIsOpenStop(true);
     setLoading(true);
-    try {
-      const response = await api.post(`streams/end/${roomId}`);
-      setLoading(false);
-      toast.success("Stop stream successfully");
-      navigate("/");
-    } catch (error) {
-      console.log(error);
+    if (user?.id === stream?.userId) {
+      try {
+        const response = await api.post(`streams/end/${roomId}`);
+        setLoading(false);
+        toast.success("Stop stream successfully");
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -206,16 +181,21 @@ const LiveStream = () => {
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      // Display a confirmation dialog to the user
       event.preventDefault();
-      event.returnValue = ""; // This is necessary for the dialog to show in some browsers
+      event.returnValue = "";
+    };
+
+    const handleUnload = () => {
+      handleStopStream();
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
 
     // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
     };
   }, []);
 
@@ -244,6 +224,7 @@ const LiveStream = () => {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               />
+              {viewersCount} watching
               <div style={{ marginTop: "16px", textAlign: "center" }}>
                 {user?._id === stream?.userId ? (
                   <Button
@@ -349,7 +330,6 @@ const LiveStream = () => {
                 overflowY: "scroll",
               }}
             />
-
             <Form
               onFinish={sendMessage}
               layout="inline"
@@ -370,7 +350,6 @@ const LiveStream = () => {
                 </Button>
               </Form.Item>
             </Form>
-
             <div
               style={{
                 marginTop: "16px",
