@@ -13,10 +13,8 @@ import logo from "../../img/logo-color.png";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
 import { useDispatch, useSelector } from "react-redux";
-import api from "../../configs/axios";
-import { login, logout } from "../../redux/features/userSlice";
+import { logout } from "../../redux/features/userSlice";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -27,11 +25,7 @@ const getBase64 = (file) =>
   });
 
 function Header() {
-  const [isOpenSignUp, setIsOpenSignUp] = useState(false);
-  const [isOpenLogin, setIsOpenLogin] = useState(false);
   const [isOpenLive, setIsOpenLive] = useState(false);
-  const [form] = useForm();
-  const [loginForm] = useForm();
   const [liveForm] = useForm();
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -70,66 +64,9 @@ function Header() {
     </button>
   );
 
-  const handleCloseSignUp = () => {
-    form.resetFields();
-    setIsOpenSignUp(false);
-  };
-
-  const handleCloseLogin = () => {
-    loginForm.resetFields();
-    setIsOpenLogin(false);
-  };
-
   const handleCloseCreateStream = () => {
     liveForm.resetFields();
     setIsOpenLive(false);
-  };
-
-  const handleLoginForm = async (value) => {
-    let response = null;
-    try {
-      response = await api.post("auth/login", value);
-      const token = response.data?.accessToken;
-      localStorage.setItem("token", token);
-      const { _id } = jwtDecode(token);
-      const result = await api.get(`users/${_id}`);
-      const { password, createdAt, updatedAt, isActive, ...user } =
-        result.data.data;
-      dispatch(login(user));
-      handleCloseLogin();
-    } catch (error) {
-      toast.error("Email or password is incorrect");
-    }
-  };
-
-  const handleSubmitForm = async (value) => {
-    let response = null;
-    const formData = new FormData();
-    Object.keys(value).forEach((key) => {
-      formData.append(key, value[key]);
-    });
-
-    // Append the file to the FormData object
-    if (fileList.length > 0) {
-      formData.append("avatar", fileList[0].originFileObj);
-    }
-    try {
-      response = await axios.post(
-        "http://localhost:4000/api/auth/signup",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setFileList([]);
-      toast.success("Sign up successfully");
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error.response?.data.error);
-    }
-    handleCloseSignUp();
   };
 
   const handleLiveForm = async (value) => {
@@ -169,6 +106,7 @@ function Header() {
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -179,210 +117,11 @@ function Header() {
         </Link>
       </div>
       <div className="header__right">
-        {user === null ? (
-          <>
-            <button
-              onClick={() => {
-                setIsOpenLogin(true);
-              }}
-            >
-              Log in
-            </button>
-            <button onClick={() => setIsOpenSignUp(true)}>Sign up</button>
-          </>
-        ) : (
-          <>
-            <button style={{ width: 76 }} onClick={() => setIsOpenLive(true)}>
-              <VideoCameraOutlined />
-            </button>
-            <button onClick={handleLogout}>Log out</button>
-          </>
-        )}
+        <button style={{ width: 76 }} onClick={() => setIsOpenLive(true)}>
+          <VideoCameraOutlined />
+        </button>
+        <button onClick={handleLogout}>Log out</button>
       </div>
-
-      <Modal
-        open={isOpenSignUp}
-        title="Sign Up"
-        onCancel={handleCloseSignUp}
-        onClose={handleCloseSignUp}
-        footer={
-          <>
-            <Button
-              type="primary"
-              onClick={() => {
-                form.submit();
-              }}
-            >
-              Sign Up
-            </Button>
-          </>
-        }
-      >
-        <Form
-          form={form}
-          onFinish={handleSubmitForm}
-          labelCol={{ span: 24 }}
-          encType="multipart/form-data"
-        >
-          <FormItem
-            name="email"
-            label="Email"
-            rules={[
-              {
-                type: "email",
-                message: "Please input your valid email",
-              },
-              {
-                required: true,
-                message: "Please input your email",
-              },
-            ]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            name="username"
-            label="Username"
-            rules={[
-              {
-                required: true,
-                message: "Please input your username",
-              },
-            ]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your password",
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </FormItem>
-          <FormItem
-            name="confirmPassword"
-            label="Confirm Password"
-            dependencies={["password"]}
-            hasFeedback
-            rules={[
-              {
-                required: true,
-                message: "Please confirm your password",
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error("The two passwords do not match!")
-                  );
-                },
-              }),
-            ]}
-          >
-            <Input.Password />
-          </FormItem>
-          <FormItem
-            name="bio"
-            label="Bio"
-            rules={[
-              {
-                required: true,
-                message: "Please input your bio",
-              },
-            ]}
-          >
-            <Input.TextArea rows={5} />
-          </FormItem>
-          <FormItem name="avatar" label="Avatar">
-            <Upload
-              listType="picture-circle"
-              fileList={fileList}
-              onPreview={handlePreview}
-              onChange={handleChange}
-              maxCount={1}
-            >
-              {fileList.length >= 8 ? null : uploadButton}
-            </Upload>
-          </FormItem>
-        </Form>
-        {previewImage && (
-          <Image
-            wrapperStyle={{
-              display: "none",
-            }}
-            preview={{
-              visible: previewOpen,
-              onVisibleChange: (visible) => setPreviewOpen(visible),
-              afterOpenChange: (visible) => !visible && setPreviewImage(""),
-            }}
-            src={previewImage}
-          />
-        )}
-      </Modal>
-
-      <Modal
-        title="Login"
-        open={isOpenLogin}
-        onCancel={handleCloseLogin}
-        onClose={handleCloseLogin}
-        footer={
-          <>
-            <Button
-              type="primary"
-              onClick={() => {
-                loginForm.submit();
-              }}
-            >
-              Login
-            </Button>
-          </>
-        }
-      >
-        <Form
-          form={loginForm}
-          onFinish={handleLoginForm}
-          labelCol={{ span: 24 }}
-        >
-          <Form.Item name="login" hidden></Form.Item>
-          <FormItem
-            name="email"
-            label="Email"
-            rules={[
-              {
-                type: "email",
-                message: "Please input your valid email",
-              },
-              {
-                required: true,
-                message: "Please input your email",
-              },
-            ]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your password",
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </FormItem>
-        </Form>
-      </Modal>
 
       <Modal
         open={isOpenLive}
@@ -448,6 +187,19 @@ function Header() {
             </Upload>
           </FormItem>
         </Form>
+        {previewImage && (
+          <Image
+            wrapperStyle={{
+              display: "none",
+            }}
+            preview={{
+              visible: previewOpen,
+              onVisibleChange: (visible) => setPreviewOpen(visible),
+              afterOpenChange: (visible) => !visible && setPreviewImage(""),
+            }}
+            src={previewImage}
+          />
+        )}
       </Modal>
     </div>
   );

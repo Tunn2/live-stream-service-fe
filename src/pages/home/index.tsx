@@ -21,6 +21,9 @@ import pubgImg from "../../../src/img/pubg.jpg";
 import avatarImg from "../../../src/img/avarta.jpg";
 import gtaImg from "../../../src/img/gta.jpg";
 import api from "../../configs/axios";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -36,12 +39,19 @@ const categories = [
 
 const HomePage = () => {
   const [streams, setStreams] = useState([]);
-
+  const user = useSelector((store) => store.user);
+  const navigate = useNavigate();
   // Fetch live streams when the component mounts
   useEffect(() => {
+    if (user === null) {
+      navigate("/login");
+      toast.warning("Please login before watching");
+    }
     const fetchStreams = async () => {
       try {
-        const response = await api.get("http://localhost:4000/api/streams?isStreaming=true");
+        const response = await api.get(
+          "http://localhost:4000/api/streams?isStreaming=true"
+        );
         setStreams(response.data.data); // Assuming the API response returns an array of streams
       } catch (error) {
         console.error("Error fetching streams:", error);
@@ -113,7 +123,10 @@ const HomePage = () => {
                       />
                     }
                   >
-                    <Meta title={stream.title} description={stream.description} />
+                    <Meta
+                      title={stream.title}
+                      description={stream.description}
+                    />
                   </Card>
                 </Col>
               ))
