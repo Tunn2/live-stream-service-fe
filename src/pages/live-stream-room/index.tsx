@@ -65,8 +65,10 @@ const LiveStream = () => {
   const handleGetStream = async () => {
     try {
       const response = await api.get(`streams/${roomId}`);
+      if (response.data.data.endedAt !== null) {
+        navigate("/error");
+      }
       setStream(response.data.data);
-      console.log(stream);
     } catch (error) {
       console.error("Failed to fetch stream:", error);
       toast.error("Could not load the stream.");
@@ -196,33 +198,54 @@ const LiveStream = () => {
     }
   }, [stream]);
 
+  // useEffect(() => {
+  //   window.addEventListener("beforeunload", function (e) {
+  //     handleStopStream();
+  //   });
+  // });
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      // Display a confirmation dialog to the user
+      event.preventDefault();
+      event.returnValue = ""; // This is necessary for the dialog to show in some browsers
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <div style={{ padding: "24px", backgroundColor: "#f0f2f5" }}>
       <Row gutter={[24, 24]}>
         {/* Camera Stream Section */}
-        {user?._id == stream?.userId ? (
-          <>
-            <Col xs={24} sm={24} md={12}>
-              <Card
-                title="Camera Stream"
-                bordered={false}
+        <>
+          <Col xs={12} sm={24} md={12}>
+            <Card
+              title="Live Stream"
+              bordered={false}
+              style={{
+                marginBottom: "24px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <video
+                ref={liveVideoRef}
+                autoPlay
+                muted
                 style={{
-                  marginBottom: "24px",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
-              >
-                <video
-                  ref={liveVideoRef}
-                  autoPlay
-                  muted
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                  }}
-                />
-                <div style={{ marginTop: "16px", textAlign: "center" }}>
+              />
+              <div style={{ marginTop: "16px", textAlign: "center" }}>
+                {user?._id === stream?.userId ? (
                   <Button
                     type="primary"
                     onClick={() => setIsOpenStop(true)}
@@ -231,36 +254,36 @@ const LiveStream = () => {
                   >
                     Stop Stream
                   </Button>
-                  <Modal
-                    open={isOpenStop}
-                    title="Do you want to stop?"
-                    onCancel={() => setIsOpenStop(false)}
-                    footer={
-                      <>
-                        <Button onClick={() => setIsOpenStop(false)}>No</Button>
-                        <Button
-                          type="primary"
-                          danger
-                          onClick={() => handleStopStream()}
-                          loading={loading}
-                        >
-                          Yes
-                        </Button>
-                      </>
-                    }
-                  >
-                    This action will stop your stream
-                  </Modal>
-                </div>
-              </Card>
-            </Col>
-          </>
-        ) : (
-          <></>
-        )}
+                ) : (
+                  <></>
+                )}
+                <Modal
+                  open={isOpenStop}
+                  title="Do you want to stop?"
+                  onCancel={() => setIsOpenStop(false)}
+                  footer={
+                    <>
+                      <Button onClick={() => setIsOpenStop(false)}>No</Button>
+                      <Button
+                        type="primary"
+                        danger
+                        onClick={() => handleStopStream()}
+                        loading={loading}
+                      >
+                        Yes
+                      </Button>
+                    </>
+                  }
+                >
+                  This action will stop your stream
+                </Modal>
+              </div>
+            </Card>
+          </Col>
+        </>
 
         {/* Live Stream Section */}
-        <Col xs={24}>
+        {/* <Col xs={24}>
           <Card
             title="Live Stream"
             bordered={false}
@@ -299,60 +322,70 @@ const LiveStream = () => {
           <Title level={4} style={{ textAlign: "center", marginTop: "12px" }}>
             {stream?.title}
           </Title>
+        </Col> */}
+        <Col xs={12}>
+          <Card
+            title="Comments"
+            bordered={false}
+            style={{
+              marginBottom: "24px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <List
+              dataSource={messages}
+              renderItem={(item) => (
+                <List.Item key={item.id} ref={messageEndRef}>
+                  <List.Item.Meta
+                    avatar={<Avatar icon={<UserOutlined />} />}
+                    title={<Text strong>{item.sender}:</Text>}
+                    description={item.text}
+                  />
+                </List.Item>
+              )}
+              style={{
+                marginBottom: "16px",
+                height: "300px",
+                overflowY: "scroll",
+              }}
+            />
+
+            <Form
+              onFinish={sendMessage}
+              layout="inline"
+              style={{ width: "100%" }}
+            >
+              <Form.Item style={{ flexGrow: 1 }}>
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Nhập tin nhắn"
+                  onPressEnter={sendMessage} // Nhấn Enter để gửi tin nhắn
+                  style={{ marginBottom: "10px" }}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Send
+                </Button>
+              </Form.Item>
+            </Form>
+
+            <div
+              style={{
+                marginTop: "16px",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              {/* <LikeButton isLiked={like} /> */}
+              <ShareButton />
+            </div>
+          </Card>
         </Col>
       </Row>
 
       {/* Comments Section */}
-      <Card
-        title="Comments"
-        bordered={false}
-        style={{
-          marginBottom: "24px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <List
-          dataSource={messages}
-          renderItem={(item) => (
-            <List.Item key={item.id} ref={messageEndRef}>
-              <List.Item.Meta
-                avatar={<Avatar icon={<UserOutlined />} />}
-                title={<Text strong>{item.sender}:</Text>}
-                description={item.text}
-              />
-            </List.Item>
-          )}
-          style={{ marginBottom: "16px", height: "300px", overflowY: "scroll" }}
-        />
-
-        <Form onFinish={sendMessage} layout="inline" style={{ width: "100%" }}>
-          <Form.Item style={{ flexGrow: 1 }}>
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Nhập tin nhắn"
-              onPressEnter={sendMessage} // Nhấn Enter để gửi tin nhắn
-              style={{ marginBottom: "10px" }}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Send
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <div
-          style={{
-            marginTop: "16px",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* <LikeButton isLiked={like} /> */}
-          <ShareButton />
-        </div>
-      </Card>
     </div>
   );
 };

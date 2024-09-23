@@ -130,7 +130,15 @@ function Header() {
         </button>
       </div>
       <div className="header__right">
-        <Avatar size={"large"} icon={<UserOutlined />} src={user?.avatarUrl} />
+        <Avatar
+          size={"large"}
+          icon={<UserOutlined />}
+          src={user?.avatarUrl}
+          onClick={() => {
+            navigate("/profile");
+          }}
+          style={{ cursor: "pointer" }}
+        />
         <button onClick={handleLogout}>Log out</button>
       </div>
 
@@ -159,9 +167,6 @@ function Header() {
           encType="multipart/form-data"
         >
           <FormItem name="title" label="Title">
-            <Input />
-          </FormItem>
-          <FormItem name="description" label="Description">
             <Input />
           </FormItem>
           <FormItem name="categories" label="Category">
