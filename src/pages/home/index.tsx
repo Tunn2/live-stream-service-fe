@@ -40,6 +40,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(6);
 
   interface Stream {
     _id: string;
@@ -54,7 +55,7 @@ const HomePage = () => {
     const fetchStreams = async () => {
       try {
         const response = await api.get(
-          `http://localhost:4000/api/streams?page=${currentPage}&isStreaming=true`
+          `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
         );
         setStreams(response.data.data.streams); // Assuming the API response returns an array of streams
         setTotalPages(response.data.data.totalPages);
@@ -65,7 +66,7 @@ const HomePage = () => {
     };
 
     fetchStreams();
-  }, [currentPage]);
+  }, [currentPage, pageSize]);
 
   return (
     <Layout style={{ padding: "20px", gap: "20px" }}>
