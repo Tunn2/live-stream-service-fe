@@ -1,21 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  Layout,
-  Typography,
-  Row,
-  Col,
-  Card,
-  List,
-  Avatar,
-  Divider,
-  Input,
-  Button,
-} from "antd";
-import axios from "axios"; // Import axios for making the API call
+import { Layout, Typography, Row, Col, Card, List, Avatar, Input } from "antd";
 import stream from "../../../src/img/stream.jpg";
-import stream1 from "../../../src/img/stream2.jpg";
-import stream2 from "../../../src/img/stream3.jpg";
-import stream3 from "../../../src/img/stream4.jpg";
 import lienminhImg from "../../../src/img/lienminh.jpg";
 import pubgImg from "../../../src/img/pubg.jpg";
 import avatarImg from "../../../src/img/avarta.jpg";
@@ -40,13 +25,8 @@ const categories = [
 const HomePage = () => {
   const [streams, setStreams] = useState([]);
   const user = useSelector((store) => store.user);
-  const navigate = useNavigate();
   // Fetch live streams when the component mounts
   useEffect(() => {
-    if (user === null) {
-      navigate("/login");
-      toast.warning("Please login before watching");
-    }
     const fetchStreams = async () => {
       try {
         const response = await api.get(
@@ -93,7 +73,7 @@ const HomePage = () => {
 
       {/* Main Content Section */}
       <Layout style={{ background: "#fff" }}>
-        <Content style={{ marginBottom: "32px" }}>
+        <Content style={{ margin: "20px auto", width: "60vw" }}>
           <img
             src={stream}
             alt="Featured Stream"
@@ -136,47 +116,6 @@ const HomePage = () => {
           </Row>
         </Content>
       </Layout>
-
-      {/* Chat Box Section */}
-      <Sider width={300} style={{ background: "#fff" }}>
-        <Title level={6} style={{ marginBottom: "16px" }}>
-          Live Chat
-        </Title>
-        <div
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            backgroundColor: "#f5f5f5",
-            height: "442px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ flexGrow: 1, padding: "16px", overflowY: "auto" }}>
-            {/* Placeholder for chat messages */}
-            <Text type="secondary">No messages yet.</Text>
-          </div>
-          <Divider />
-          <div style={{ padding: "16px", display: "flex" }}>
-            <TextArea
-              rows={1}
-              placeholder="Type a message"
-              style={{ marginRight: "8px", borderRadius: "8px" }}
-            />
-            <Button
-              type="default"
-              style={{
-                borderRadius: "8px",
-                backgroundColor: "#909090",
-                color: "white",
-              }}
-              hover={{ backgroundColor: "#707070" }}
-            >
-              Send
-            </Button>
-          </div>
-        </div>
-      </Sider>
     </Layout>
   );
 };

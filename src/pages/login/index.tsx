@@ -24,6 +24,7 @@ export default function Login() {
 
   const onFinish = async (values) => {
     let response = null;
+    console.log(values);
 
     try {
       response = await api.post("auth/login", values);

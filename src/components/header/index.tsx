@@ -1,4 +1,13 @@
-import { Button, Form, Image, Input, Modal, Select, Upload } from "antd";
+import {
+  Avatar,
+  Button,
+  Form,
+  Image,
+  Input,
+  Modal,
+  Select,
+  Upload,
+} from "antd";
 import "./index.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -7,6 +16,7 @@ import FormItem from "antd/es/form/FormItem";
 import {
   LoadingOutlined,
   PlusOutlined,
+  UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import logo from "../../img/logo-color.png";
@@ -112,14 +122,23 @@ function Header() {
   return (
     <div className="header">
       <div className="header__left">
-        <Link to="">
+        <Link to="/">
           <img src={logo} alt="" />
         </Link>
-      </div>
-      <div className="header__right">
         <button style={{ width: 76 }} onClick={() => setIsOpenLive(true)}>
           <VideoCameraOutlined />
         </button>
+      </div>
+      <div className="header__right">
+        <Avatar
+          size={"large"}
+          icon={<UserOutlined />}
+          src={user?.avatarUrl}
+          onClick={() => {
+            navigate("/profile");
+          }}
+          style={{ cursor: "pointer" }}
+        />
         <button onClick={handleLogout}>Log out</button>
       </div>
 
@@ -148,9 +167,6 @@ function Header() {
           encType="multipart/form-data"
         >
           <FormItem name="title" label="Title">
-            <Input />
-          </FormItem>
-          <FormItem name="description" label="Description">
             <Input />
           </FormItem>
           <FormItem name="categories" label="Category">
