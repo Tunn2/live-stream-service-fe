@@ -7,24 +7,26 @@ import api from "../../configs/axios";
 
 const LikeButton = ({ streamId, userId, likeCount, like }) => {
   const [liked, setLiked] = useState(like);
+  const [likedCount, setLikedCount] = useState(likeCount);
 
   const handleClick = async () => {
+    console.log(likedCount);
     if (liked) {
+      setLikedCount(likedCount - 1);
       const response = await api.post(`streams/${streamId}/${userId}/dislike`);
     } else {
+      setLikedCount(likedCount + 1);
       const response = await api.post(`streams/${streamId}/${userId}/like`);
     }
     setLiked(!liked);
   };
-  useEffect(() => {
-    setLiked(false);
-  }, []);
+
   return (
     <Button
       className={`like-button ${liked ? "liked" : ""}`}
       onClick={handleClick}
     >
-      {likeCount} <LikeOutlined />
+      {likedCount} <LikeOutlined />
     </Button>
   );
 };

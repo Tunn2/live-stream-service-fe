@@ -74,9 +74,7 @@ const LiveStream = () => {
       console.log(response.data.data);
       setStream(response.data.data);
       setLikeCount(response.data.data.likeBy.length);
-      if (response.data.data.likeBy.includes(user?._id)) {
-        setLike(true);
-      }
+      setLike(response.data.data.likeBy.includes(user?._id));
     } catch (error) {
       console.error("Failed to fetch stream:", error);
       toast.error("Could not load the stream.");
@@ -115,7 +113,7 @@ const LiveStream = () => {
   const handleStopStream = async () => {
     setIsOpenStop(true);
     setLoading(true);
-    if (user?.id === stream?.userId) {
+    if (user?._id === stream?.userId) {
       try {
         const response = await api.post(`streams/end/${roomId}`);
         setLoading(false);
@@ -171,12 +169,6 @@ const LiveStream = () => {
       return () => clearInterval(interval);
     }
   }, [stream]);
-
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", function (e) {
-  //     handleStopStream();
-  //   });
-  // });
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -262,47 +254,6 @@ const LiveStream = () => {
           </Col>
         </>
 
-        {/* Live Stream Section */}
-        {/* <Col xs={24}>
-          <Card
-            title="Live Stream"
-            bordered={false}
-            style={{
-              marginBottom: "24px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            {loading ? (
-              <Skeleton active />
-            ) : (
-              <video
-                ref={liveVideoRef}
-                autoPlay
-                style={{
-                  width: "100%",
-                  maxWidth: "720px",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                }}
-              />
-            )}
-            <Badge
-              count={viewersCount}
-              style={{
-                backgroundColor: "#52c41a",
-                marginTop: "12px",
-                marginRight: "-28px",
-                textAlign: "center",
-                width: "100%",
-              }}
-            >
-              <Text type="secondary">Viewers</Text>
-            </Badge>
-          </Card>
-          <Title level={4} style={{ textAlign: "center", marginTop: "12px" }}>
-            {stream?.title}
-          </Title>
-        </Col> */}
         <Col xs={12}>
           <Card
             title="Comments"
@@ -317,7 +268,9 @@ const LiveStream = () => {
               renderItem={(item) => (
                 <List.Item key={item.id} ref={messageEndRef}>
                   <List.Item.Meta
-                    avatar={<Avatar icon={<UserOutlined />} />}
+                    avatar={
+                      <Avatar icon={<UserOutlined />} src={item.avatar} />
+                    }
                     title={<Text strong>{item.sender}:</Text>}
                     description={item.text}
                   />
@@ -356,19 +309,19 @@ const LiveStream = () => {
                 justifyContent: "space-between",
               }}
             >
-              <LikeButton
-                streamId={stream?._id}
-                userId={user?._id}
-                likeCount={likeCount}
-                like={like}
-              />
+              {stream && (
+                <LikeButton
+                  streamId={stream._id}
+                  userId={user?._id}
+                  likeCount={likeCount}
+                  like={like}
+                />
+              )}
               <ShareButton />
             </div>
           </Card>
         </Col>
       </Row>
-
-      {/* Comments Section */}
     </div>
   );
 };
