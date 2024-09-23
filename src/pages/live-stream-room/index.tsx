@@ -38,6 +38,8 @@ const LiveStream = () => {
   const [stream, setStream] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpenStop, setIsOpenStop] = useState(false);
+  const [like, setLike] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -68,7 +70,13 @@ const LiveStream = () => {
       if (response.data.data.endedAt !== null) {
         navigate("/error");
       }
+
+      console.log(response.data.data);
       setStream(response.data.data);
+      setLikeCount(response.data.data.likeBy.length);
+      if (response.data.data.likeBy.includes(user?._id)) {
+        setLike(true);
+      }
     } catch (error) {
       console.error("Failed to fetch stream:", error);
       toast.error("Could not load the stream.");
@@ -78,15 +86,6 @@ const LiveStream = () => {
   useEffect(() => {
     handleGetStream();
   }, []);
-
-  const stopStream = () => {
-    setStreaming(false);
-    socket.emit("disconnect");
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
-    videoRef.current.srcObject = null;
-  };
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -357,7 +356,12 @@ const LiveStream = () => {
                 justifyContent: "space-between",
               }}
             >
-              {/* <LikeButton isLiked={like} /> */}
+              <LikeButton
+                streamId={stream?._id}
+                userId={user?._id}
+                likeCount={likeCount}
+                like={like}
+              />
               <ShareButton />
             </div>
           </Card>
