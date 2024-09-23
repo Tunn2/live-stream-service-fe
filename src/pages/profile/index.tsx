@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useEffect, useState, useRef } from "react";
 import {
   Avatar,
   Button,
@@ -10,22 +9,18 @@ import {
   theme,
   Typography,
 } from "antd";
-
 import {
-  LoadingOutlined,
-  MailOutlined,
-  PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/features/userSlice";
 
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
-const { Text, Title, Link } = Typography;
+const { Title } = Typography;
+
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -40,19 +35,26 @@ export default function Profile() {
   const [fileList, setFileList] = useState([]);
   const [previewImage, setPreviewImage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state for save button
   const [disable, setDisable] = useState(true);
+  const [form] = Form.useForm(); // Form instance for reset
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
+  const fileInputRef = useRef(null); // Ref for file input
 
-  const handlePreview = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+  const handleFileInputChange = (e) => {
+    const files = e.target.files;
+    if (files.length > 0) {
+      const newFileList = [{
+        uid: files[0].name,
+        name: files[0].name,
+        status: 'done',
+        url: URL.createObjectURL(files[0]),
+        originFileObj: files[0],
+      }];
+      setFileList(newFileList);
     }
-    setPreviewImage(file.url || file.preview);
-    setPreviewOpen(true);
   };
-  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const onFinish = async (values) => {
     let response = null;
@@ -62,10 +64,11 @@ export default function Profile() {
       formData.append(key, values[key]);
     });
     if (fileList.length > 0) {
-      formData.append("avatar", fileList[0].originFileObj);
+      formData.append("avatar", fileList[0].originFileObj); // Add the new image
     }
 
     try {
+      setLoading(true); // Set loading state to true
       response = await api.patch(`users/${user?._id}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -73,43 +76,28 @@ export default function Profile() {
       });
       const { password, createdAt, updatedAt, isActive, ...result } =
         response.data.data;
-      dispatch(login(result));
+      dispatch(login(result)); // Update user data in userSlice
       setDisable(true);
       setFileList([]);
       toast.success("Update successfully");
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.response?.data.error);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
-  const uploadButton = (
-    <button
-      style={{
-        border: 0,
-        background: "none",
-      }}
-      type="button"
-    >
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div
-        style={{
-          marginTop: 8,
-        }}
-      >
-        Upload
-      </div>
-    </button>
-  );
+
+  const handleCancel = () => {
+    form.resetFields(); // Reset form fields
+    setFileList([]); // Reset uploaded file list
+    setDisable(true); // Disable form editing
+  };
 
   const styles = {
     container: {
       margin: "0 auto",
-      padding: screens.md
-        ? `${token.paddingXL}px`
-        : `${token.paddingXL}px ${token.padding}px`,
+      padding: screens.md ? `${token.paddingXL}px` : `${token.paddingXL}px ${token.padding}px`,
       width: "380px",
-    },
-    forgotPassword: {
-      float: "right",
     },
     header: {
       marginBottom: token.marginXL,
@@ -122,32 +110,30 @@ export default function Profile() {
       height: screens.sm ? "100vh" : "auto",
       padding: screens.md ? `${token.sizeXXL}px 0px` : "0px",
     },
-    signup: {
-      marginTop: token.marginLG,
-      textAlign: "center",
-      width: "100%",
-    },
-    text: {
-      color: token.colorTextSecondary,
-    },
-    title: {
-      fontSize: screens.md ? token.fontSizeHeading2 : token.fontSizeHeading3,
-    },
   };
 
   return (
     <section style={styles.section}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <Title style={styles.title}>Your Information</Title>
+          <Title>Your Information</Title>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            accept="image/*"
+            onChange={handleFileInputChange}
+          />
           <Avatar
             size={64}
             icon={<UserOutlined />}
-            src={user?.avatarUrl}
+            src={fileList.length > 0 ? fileList[0].url : user?.avatarUrl}
             style={{ cursor: "pointer" }}
+            onClick={() => fileInputRef.current.click()} // Trigger file input
           />
         </div>
         <Form
+          form={form}
           name="signup"
           onFinish={onFinish}
           layout="vertical"
@@ -158,59 +144,32 @@ export default function Profile() {
           <Form.Item
             name="name"
             label="Name"
-            rules={[
-              {
-                required: true,
-                message: "Please input your Name!",
-              },
-            ]}
+            rules={[{ required: true, message: "Please input your Name!" }]}
           >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="Name"
-              disabled={disable}
-            />
+            <Input prefix={<UserOutlined />} placeholder="Name" disabled={disable} />
           </Form.Item>
           <Form.Item
             name="bio"
             label="Bio"
-            rules={[
-              {
-                required: true,
-                message: "Please input your bio",
-              },
-            ]}
+            rules={[{ required: true, message: "Please input your bio" }]}
           >
             <Input.TextArea rows={1} disabled={disable} />
           </Form.Item>
-          <Form.Item style={{ marginBottom: "0px" }}>
-            <Button
-              block
-              onClick={() => {
-                setDisable(false);
-              }}
-              style={{ marginBottom: "20px" }}
-            >
+          <Form.Item>
+            <Button block onClick={() => setDisable(false)} style={{ marginBottom: "20px" }} disabled={loading}>
               Edit
             </Button>
-            <Button
-              block
-              type="primary"
-              onClick={() => {
-                setDisable(false);
-              }}
-              htmlType="submit"
-              disabled={disable}
-            >
+            <Button block type="primary" htmlType="submit" loading={loading} disabled={disable || loading} style={{ marginBottom: "20px" }}>
               Save
+            </Button>
+            <Button block danger onClick={handleCancel} disabled={disable || loading}>
+              Cancel
             </Button>
           </Form.Item>
         </Form>
         {previewImage && (
           <Image
-            wrapperStyle={{
-              display: "none",
-            }}
+            wrapperStyle={{ display: "none" }}
             preview={{
               visible: previewOpen,
               onVisibleChange: (visible) => setPreviewOpen(visible),
