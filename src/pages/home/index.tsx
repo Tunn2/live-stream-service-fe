@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Typography, Row, Col, Card, List, Avatar, Input } from "antd";
+import {
+  Layout,
+  Typography,
+  Row,
+  Col,
+  Card,
+  List,
+  Avatar,
+  Divider,
+  Input,
+  Button,
+  Pagination,
+} from "antd";
+import axios from "axios"; // Import axios for making the API call
 import stream from "../../../src/img/stream.jpg";
 import lienminhImg from "../../../src/img/lienminh.jpg";
 import pubgImg from "../../../src/img/pubg.jpg";
 import avatarImg from "../../../src/img/avarta.jpg";
 import gtaImg from "../../../src/img/gta.jpg";
 import api from "../../configs/axios";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -23,23 +34,36 @@ const categories = [
 ];
 
 const HomePage = () => {
-  const [streams, setStreams] = useState([]);
-  const user = useSelector((store) => store.user);
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(6);
+
+  interface Stream {
+    _id: string;
+    title: string;
+    description: string;
+    thumbnailUrl: string;
+  }
+  const [streams, setStreams] = useState<Stream[]>([]);
+
   // Fetch live streams when the component mounts
   useEffect(() => {
     const fetchStreams = async () => {
       try {
         const response = await api.get(
-          "http://localhost:4000/api/streams?isStreaming=true"
+          `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
         );
-        setStreams(response.data.data); // Assuming the API response returns an array of streams
+        setStreams(response.data.data.streams); // Assuming the API response returns an array of streams
+        setTotalPages(response.data.data.totalPages);
+        console.log("Streams:", response.data.data);
       } catch (error) {
         console.error("Error fetching streams:", error);
       }
     };
 
     fetchStreams();
-  }, []);
+  }, [currentPage, pageSize]);
 
   return (
     <Layout style={{ padding: "20px", gap: "20px" }}>
@@ -98,10 +122,13 @@ const HomePage = () => {
                     cover={
                       <img
                         alt={stream.title}
-                        src={stream.image} // Assuming each stream has an image URL
+                        src={stream.thumbnailUrl} // Assuming each stream has an image URL
                         style={{ height: "200px", borderRadius: "8px" }}
                       />
                     }
+                    onClick={() => {
+                      navigate(`/room/${stream._id}`);
+                    }}
                   >
                     <Meta
                       title={stream.title}
@@ -114,6 +141,14 @@ const HomePage = () => {
               <Text>No streams available</Text>
             )}
           </Row>
+          <Pagination
+            align="center"
+            defaultCurrent={currentPage}
+            total={totalPages * 10}
+            onChange={(page) => {
+              setCurrentPage(page);
+            }}
+          />
         </Content>
       </Layout>
     </Layout>
