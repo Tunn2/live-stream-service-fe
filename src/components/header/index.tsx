@@ -25,6 +25,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
+import api from "../../configs/axios";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -41,6 +42,7 @@ function Header() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
+  const [categories, setCategories] = useState([]);
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -86,7 +88,6 @@ function Header() {
     Object.keys(value).forEach((key) => {
       formData.append(key, value[key]);
     });
-    console.log(user.email);
     formData.append("email", user.email);
     if (fileList.length > 0) {
       formData.append("thumbnail", fileList[0].originFileObj);
@@ -125,12 +126,27 @@ function Header() {
         <Link to="/">
           <img src={logo} alt="" />
         </Link>
-        <button style={{ width: 76 }} onClick={() => setIsOpenLive(true)}>
+        <button
+          style={{ width: 76 }}
+          onClick={async () => {
+            const response = await api.get("streams/categories");
+            setCategories(response.data.data);
+            setIsOpenLive(true);
+          }}
+        >
           <VideoCameraOutlined />
         </button>
       </div>
       <div className="header__right">
-        <Avatar size={"large"} icon={<UserOutlined />} src={user?.avatarUrl} />
+        <Avatar
+          size={"large"}
+          icon={<UserOutlined />}
+          src={user?.avatarUrl}
+          onClick={() => {
+            navigate("/profile");
+          }}
+          style={{ cursor: "pointer" }}
+        />
         <button onClick={handleLogout}>Log out</button>
       </div>
 
@@ -161,29 +177,12 @@ function Header() {
           <FormItem name="title" label="Title">
             <Input />
           </FormItem>
-          <FormItem name="description" label="Description">
-            <Input />
-          </FormItem>
           <FormItem name="categories" label="Category">
             <Select
-              options={[
-                {
-                  label: "LOL",
-                  value: "lol",
-                },
-                {
-                  label: "PUBG",
-                  value: "pubg",
-                },
-                {
-                  label: "CSGO",
-                  value: "csgo",
-                },
-                {
-                  label: "Valorant",
-                  value: "valorant",
-                },
-              ]}
+              defaultValue={"Chưa chọn"}
+              options={categories.map((category) => {
+                return { value: category.name, label: category.name };
+              })}
             />
           </FormItem>
           <FormItem name="thumbnail" label="Thumbnail">

@@ -14,9 +14,6 @@ import {
 } from "antd";
 import axios from "axios"; // Import axios for making the API call
 import stream from "../../../src/img/stream.jpg";
-import stream1 from "../../../src/img/stream2.jpg";
-import stream2 from "../../../src/img/stream3.jpg";
-import stream3 from "../../../src/img/stream4.jpg";
 import lienminhImg from "../../../src/img/lienminh.jpg";
 import pubgImg from "../../../src/img/pubg.jpg";
 import avatarImg from "../../../src/img/avarta.jpg";
@@ -54,10 +51,6 @@ const HomePage = () => {
 
   // Fetch live streams when the component mounts
   useEffect(() => {
-    if (user === null) {
-      navigate("/login");
-      toast.warning("Please login before watching");
-    }
     const fetchStreams = async () => {
       try {
         const response = await api.get(
@@ -106,7 +99,7 @@ const HomePage = () => {
 
       {/* Main Content Section */}
       <Layout style={{ background: "#fff" }}>
-        <Content style={{ marginBottom: "32px", width: "1400px" }}>
+        <Content style={{ margin: "20px auto", width: "60vw" }}>
           <img
             src={stream}
             alt="Featured Stream"

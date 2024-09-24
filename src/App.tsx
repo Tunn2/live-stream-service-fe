@@ -4,6 +4,9 @@ import LiveStream from "./pages/live-stream-room";
 import { lazy, Suspense } from "react";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import Profile from "./pages/profile";
+import ProtectedRoute from "./ProtectedRoute";
+import Error from "./pages/error";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -11,7 +14,11 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Layout />,
+      element: (
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           path: "/",
@@ -21,20 +28,32 @@ function App() {
             </Suspense>
           ),
         },
+        {
+          path: "profile",
+          element: <Profile />,
+        },
       ],
     },
     {
       path: "room/:id",
-      element: <LiveStream />,
+      element: (
+        <ProtectedRoute>
+          <LiveStream />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "login",
-      element: <Login/>,
+      element: <Login />,
     },
     {
       path: "signup",
-      element: <Signup/>,
-    }
+      element: <Signup />,
+    },
+    {
+      path: "error",
+      element: <Error />,
+    },
   ]);
   return <RouterProvider router={router} />;
 }

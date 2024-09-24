@@ -3,27 +3,30 @@ import "./index.scss";
 import { Button } from "antd";
 import { LikeOutlined } from "@ant-design/icons";
 import axios from "axios";
+import api from "../../configs/axios";
 
-const LikeButton = ({ isLiked, streamId, userId }) => {
-  const [liked, setLiked] = useState(false);
+const LikeButton = ({ streamId, userId, likeCount, like }) => {
+  const [liked, setLiked] = useState(like);
+  const [likedCount, setLikedCount] = useState(likeCount);
 
   const handleClick = async () => {
+    console.log(likedCount);
     if (liked) {
-      const response = await axios.post(
-        `http://localhost:4000/api/streams/${streamId}/${userId}/dislike`
-      );
+      setLikedCount(likedCount - 1);
+      const response = await api.post(`streams/${streamId}/${userId}/dislike`);
+    } else {
+      setLikedCount(likedCount + 1);
+      const response = await api.post(`streams/${streamId}/${userId}/like`);
     }
     setLiked(!liked);
   };
-  useEffect(() => {
-    setLiked(isLiked);
-  }, []);
+
   return (
     <Button
       className={`like-button ${liked ? "liked" : ""}`}
       onClick={handleClick}
     >
-      <LikeOutlined />
+      {likedCount} <LikeOutlined />
     </Button>
   );
 };
