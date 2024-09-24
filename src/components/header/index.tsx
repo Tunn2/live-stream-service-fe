@@ -1,4 +1,5 @@
 import {
+  Alert,
   Avatar,
   Button,
   Form,
@@ -89,6 +90,7 @@ function Header() {
       formData.append(key, value[key]);
     });
     formData.append("email", user.email);
+    <Alert message="Informational Notes" type="info" showIcon />;
     if (fileList.length > 0) {
       formData.append("thumbnail", fileList[0].originFileObj);
     }
@@ -103,7 +105,11 @@ function Header() {
           },
         }
       );
+      toast.success(
+        `Link RTMP: rtmp://localhost:1935/live\nStream key: ${user.email}`
+      );
       setFileList([]);
+      setLoading(false);
     } catch (error: any) {
       console.log(error);
       toast.error(error.response?.data.error);
@@ -113,7 +119,6 @@ function Header() {
     const stream = response?.data.data;
     navigate(`room/${stream._id}`);
   };
-
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem("token");
