@@ -40,7 +40,6 @@ const LiveStream = () => {
   const [isOpenStop, setIsOpenStop] = useState(false);
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-
   const navigate = useNavigate();
   useEffect(() => {
     // Tham gia vào room theo roomId
@@ -70,6 +69,7 @@ const LiveStream = () => {
       if (response.data.data.endedAt !== null) {
         navigate("/error");
       }
+
       setStream(response.data.data);
       setLikeCount(response.data.data.likeBy.length);
       setLike(response.data.data.likeBy.includes(user?._id));
