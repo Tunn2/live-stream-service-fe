@@ -24,17 +24,14 @@ import gtaImg from "../../../src/img/gta.jpg";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
 
+
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 const { Meta } = Card;
 const { TextArea } = Input;
 
-const categories = [
-  { name: "Liên Minh", image: lienminhImg },
-  { name: "PUBG", image: pubgImg },
-  { name: "Avatar", image: avatarImg },
-  { name: "GTA", image: gtaImg },
-];
+
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -42,6 +39,7 @@ const HomePage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(6);
   const [topLikedStream, setTopLikedStream] = useState(null);
+  const [categories,setCategories]= useState([]);
   interface Stream {
     _id: string;
     title: string;
@@ -72,7 +70,9 @@ const HomePage = () => {
     const fetchTopLikedStream = async () => {
       try {
         const response = await api.get("http://localhost:4000/api/stream/top1?type=like");
-        setTopLikedStream(response.data[0]); // Assuming the first item is the top-liked stream
+        setTopLikedStream(response.data); // Assuming the first item is the top-liked stream
+        const cateRes = await api.get("http://localhost:4000/api/streams/categories");
+        setCategories(cateRes.data.data);
       } catch (error) {
         console.error("Error fetching top-liked stream:", error);
       }
@@ -91,17 +91,7 @@ const HomePage = () => {
           itemLayout="vertical"
           dataSource={categories}
           renderItem={(category) => (
-            <List.Item style={{ textAlign: "center" }}>
-              <Avatar
-                shape="square"
-                size={100}
-                src={category.image}
-                style={{
-                  borderRadius: "8px",
-                  transition: "transform 0.3s",
-                  cursor: "pointer",
-                }}
-              />
+            <List.Item style={{ textAlign: "center",cursor: "pointer" }}>
               <Text style={{ display: "block", marginTop: "8px" }}>
                 {category.name}
               </Text>
@@ -114,27 +104,157 @@ const HomePage = () => {
       <Layout style={{ background: "#fff" }}>
         <Content style={{ marginBottom: "32px" }}>
           {topLikedStream ? (
+            <div style={{ position: "relative", width: "100%" }}>
+            {/* Image */}
             <img
               src={topLikedStream.thumbnailUrl}
               alt={topLikedStream.title}
-              style={{ width: "100%", borderRadius: "8px", marginBottom: "32px" }}
+              style={{ width: "80%", borderRadius: "8px", marginBottom: "32px",border: "2px solid black", margin: "0% 10%" }}
             />
+          
+            {/* Top-left corner banner */}
+            <div
+              style={{
+                position: "absolute",
+                top: "2%", // small margin from the top
+                left: "12%",
+                backgroundColor: "#FF0800",
+                color: "white",
+                padding: "5px 30px",
+                borderRadius: 5,
+                fontSize: "22px",
+                fontWeight: "bold",
+                zIndex: 1001, // Ensure it's above everything
+                border: "1px solid white"
+                
+              }}
+            >
+              Top likes
+            </div>
+          
+            {/* Bottom content */}
+            <div
+            style={{
+              position: "absolute",
+              bottom: "5%",
+              left: 0,
+              right: 0,
+              display: "flex",
+              justifyContent: "center",
+              zIndex: 1000,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "rgba(0,0,0,0.6)",
+                padding: "20px",
+                borderRadius: 10,
+                border: "3px solid rgba(145, 71, 255, 0.8)", // You can change this color
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "20px", // Space between avatar and text
+                width: "80%",
+              }}
+            >
+              {/* Avatar */}
+              <img
+                src={topLikedStream.userId.avatarUrl}
+                alt={`${topLikedStream.userId.name}'s avatar`}
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%", // Circular avatar
+                  border: "3px solid rgba(145, 71, 255, 0.8)", // You can change this color
+                }}
+              />
+
+              {/* Text Section (Title + Username) */}
+              <div style={{ flex: 1, textAlign: "left" }}>
+                {/* Stream Title */}
+                <p
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "30px",
+                    color: "rgb(210, 180, 255)", // You can change this color
+                    
+                  }}
+                >
+                  {topLikedStream.title}
+                </p>
+                  
+                {/* User Name */}
+                <p
+                  style={{
+                    fontSize: "18px",
+                    color: "rgb(210, 180, 255)", // You can change this color
+                    marginTop: "10px",
+                  }}
+                >
+                  Stream by: {topLikedStream.userId.name}
+                </p>
+
+                {/* Go to Stream Button */}
+                <Button
+                  type="default"
+                  ghost
+                  style={{
+                    width: "100%",
+                    color: "rgb(210, 180, 255)", // Text color
+                    borderColor: "rgb(210, 180, 255)", // Border color
+                    marginTop: "10px",
+                  }}
+                  onClick={() => {
+                    navigate(`/room/${topLikedStream._id}`);
+                  }}
+                >
+                  Go to Stream
+                </Button>
+              </div>
+            </div>
+          </div>
+          </div>
+          
+
+
           ) : (
-            <img
+            
+            <div style={{ position: "relative", width: "100%" }}>
+          <img
               src={stream}
               alt="Featured Stream"
               style={{ width: "100%", borderRadius: "8px", marginBottom: "32px" }}
             />
+          <div
+            style={{
+              position: "absolute",
+              bottom: "10%", // Vertical position, 10% from the bottom of the image
+              left: 0,
+              right: 0, // Ensures full width for centering
+              display: "flex",
+              justifyContent: "center", // Centers content horizontally
+              zIndex: 1000,
+            }}
+          >
+            <h2
+              style={{  
+                color: "white",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                padding: "10px 20px",
+                borderRadius: 5,
+              }}
+            >
+              No stream available yet, the most liked stream will be displayed here
+            </h2>
+          </div>
+          </div>
           )}
         </Content>
 
 
         {/* Featured Streams Section */}
         <Content>
-          <Title
-            level={4}
-            style={{ textAlign: "center", marginBottom: "32px" }}
-          >
+          <Title level={4} style={{ textAlign: "center", marginBottom: "32px" }}>
             Featured Streams
           </Title>
           <Row gutter={[16, 16]}>
@@ -144,19 +264,91 @@ const HomePage = () => {
                   <Card
                     hoverable
                     cover={
-                      <img
-                        alt={stream.title}
-                        src={stream.thumbnailUrl} // Assuming each stream has an image URL
-                        style={{ height: "200px", borderRadius: "8px" }}
-                      />
+                      <div style={{ position: "relative" }}>
+                        {/* Stream Image */}
+                        <img
+                          alt={stream.title}
+                          src={stream.thumbnailUrl} // Assuming each stream has an image URL
+                          style={{ height: "200px", width: "100%", borderRadius: "8px 8px 0px 0px", cursor: "pointer" }}
+                          onClick={() => {
+                            navigate(`/room/${stream._id}`);
+                          }}
+                        />
+
+                        {/* View Count - Top Left */}
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: "10px",
+                            left: "10px",
+                            backgroundColor: "rgba(0, 0, 0, 0.7)",
+                            color: "white",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          {stream.currentViewCount} watching
+                        </span>
+
+                        {/* LIVE Badge - Bottom Left */}
+                        <span
+                          style={{
+                            position: "absolute",
+                            bottom: "10px",
+                            left: "10px",
+                            backgroundColor: "red",
+                            color: "white",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            border: "1px solid white"
+                          }}
+                        >
+                          LIVE
+                        </span>
+                      </div>
                     }
-                    onClick={() => {
-                      navigate(`/room/${stream._id}`);
-                    }}
                   >
                     <Meta
-                      title={stream.title}
-                      description={stream.description}
+                      description={
+                        <>
+                          {/* Flex container for avatar and stream info */}
+                          <div style={{ marginTop: "10px", display: "flex", alignItems: "center", width: "100%" }}>
+                            <Row gutter={16} align="middle" onClick={() => { navigate(`/profile/${stream.userId._id}`); }}>
+                              {/* Avatar Column */}
+                              <div style={{ display: "inline-block", width: "100%" }}>
+                                {/* Avatar */}
+                                <div style={{ display: "inline-block", verticalAlign: "middle", marginRight: "10px", padding: "0px 20px" }}>
+                                  <img
+                                    alt="avatar"
+                                    src={stream.userId.avatarUrl}
+                                    style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+                                  />
+                                </div>
+
+                                {/* Stream Info */}
+                                <div style={{ display: "inline-block", verticalAlign: "middle" }}>
+                                  <span>
+                                    <strong>{stream.title}</strong> <br />
+                                    {stream.userId.name}
+                                  </span>
+                                </div>
+                              </div>
+                            </Row>
+                          </div>
+
+                          <br />
+
+                          {/* Categories */}
+                          <strong>Categories:</strong>
+                          <ul>
+                            {stream.categories.map((category, index) => (
+                              <li key={index}>{category}</li>
+                            ))}
+                          </ul>
+                        </>
+                      }
                     />
                   </Card>
                 </Col>
@@ -165,6 +357,8 @@ const HomePage = () => {
               <Text>No streams available</Text>
             )}
           </Row>
+
+          {/* Pagination */}
           <Pagination
             align="center"
             defaultCurrent={currentPage}
@@ -177,45 +371,7 @@ const HomePage = () => {
       </Layout>
 
       {/* Chat Box Section */}
-      <Sider width={300} style={{ background: "#fff" }}>
-        <Title level={6} style={{ marginBottom: "16px" }}>
-          Live Chat
-        </Title>
-        <div
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            backgroundColor: "#f5f5f5",
-            height: "442px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ flexGrow: 1, padding: "16px", overflowY: "auto" }}>
-            {/* Placeholder for chat messages */}
-            <Text type="secondary">No messages yet.</Text>
-          </div>
-          <Divider />
-          <div style={{ padding: "16px", display: "flex" }}>
-            <TextArea
-              rows={1}
-              placeholder="Type a message"
-              style={{ marginRight: "8px", borderRadius: "8px" }}
-            />
-            <Button
-              type="default"
-              style={{
-                borderRadius: "8px",
-                backgroundColor: "#909090",
-                color: "white",
-              }}
-              hover={{ backgroundColor: "#707070" }}
-            >
-              Send
-            </Button>
-          </div>
-        </div>
-      </Sider>
+      
     </Layout>
   );
 };
