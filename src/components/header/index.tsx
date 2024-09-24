@@ -143,7 +143,7 @@ function Header() {
           icon={<UserOutlined />}
           src={user?.avatarUrl}
           onClick={() => {
-            navigate("/profile");
+            navigate(`/profile/${user?._id}`);
           }}
           style={{ cursor: "pointer" }}
         />
