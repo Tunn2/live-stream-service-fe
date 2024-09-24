@@ -38,6 +38,8 @@ const LiveStream = () => {
   const [stream, setStream] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpenStop, setIsOpenStop] = useState(false);
+  const [like, setLike] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -68,7 +70,11 @@ const LiveStream = () => {
       if (response.data.data.endedAt !== null) {
         navigate("/error");
       }
+
+      console.log(response.data.data);
       setStream(response.data.data);
+      setLikeCount(response.data.data.likeBy.length);
+      setLike(response.data.data.likeBy.includes(user?._id));
     } catch (error) {
       console.error("Failed to fetch stream:", error);
       toast.error("Could not load the stream.");
@@ -78,42 +84,6 @@ const LiveStream = () => {
   useEffect(() => {
     handleGetStream();
   }, []);
-
-  // const startStream = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  //     videoRef.current.srcObject = stream;
-
-  //     const mediaRecorder = new MediaRecorder(stream, {
-  //       mimeType: "video/webm",
-  //     });
-
-  //     mediaRecorder.ondataavailable = (event) => {
-  //       if (event.data.size > 0) {
-  //         const reader = new FileReader();
-  //         reader.onloadend = () => {
-  //           const arrayBuffer = reader.result;
-  //           socket.emit("video_chunk", arrayBuffer);
-  //         };
-  //         reader.readAsArrayBuffer(event.data);
-  //       }
-  //     };
-
-  //     mediaRecorder.start(1000);
-  //     setStreaming(true);
-  //   } catch (error) {
-  //     console.error("Error starting stream:", error);
-  //   }
-  // };
-
-  const stopStream = () => {
-    setStreaming(false);
-    socket.emit("disconnect");
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
-    videoRef.current.srcObject = null;
-  };
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -143,13 +113,15 @@ const LiveStream = () => {
   const handleStopStream = async () => {
     setIsOpenStop(true);
     setLoading(true);
-    try {
-      const response = await api.post(`streams/end/${roomId}`);
-      setLoading(false);
-      toast.success("Stop stream successfully");
-      navigate("/");
-    } catch (error) {
-      console.log(error);
+    if (user?._id === stream?.userId) {
+      try {
+        const response = await api.post(`streams/end/${roomId}`);
+        setLoading(false);
+        toast.success("Stop stream successfully");
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -198,24 +170,23 @@ const LiveStream = () => {
     }
   }, [stream]);
 
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", function (e) {
-  //     handleStopStream();
-  //   });
-  // });
-
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      // Display a confirmation dialog to the user
       event.preventDefault();
-      event.returnValue = ""; // This is necessary for the dialog to show in some browsers
+      event.returnValue = "";
+    };
+
+    const handleUnload = () => {
+      handleStopStream();
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
 
     // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
     };
   }, []);
 
@@ -244,6 +215,7 @@ const LiveStream = () => {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               />
+              {viewersCount} watching
               <div style={{ marginTop: "16px", textAlign: "center" }}>
                 {user?._id === stream?.userId ? (
                   <Button
@@ -282,47 +254,6 @@ const LiveStream = () => {
           </Col>
         </>
 
-        {/* Live Stream Section */}
-        {/* <Col xs={24}>
-          <Card
-            title="Live Stream"
-            bordered={false}
-            style={{
-              marginBottom: "24px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            {loading ? (
-              <Skeleton active />
-            ) : (
-              <video
-                ref={liveVideoRef}
-                autoPlay
-                style={{
-                  width: "100%",
-                  maxWidth: "720px",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                }}
-              />
-            )}
-            <Badge
-              count={viewersCount}
-              style={{
-                backgroundColor: "#52c41a",
-                marginTop: "12px",
-                marginRight: "-28px",
-                textAlign: "center",
-                width: "100%",
-              }}
-            >
-              <Text type="secondary">Viewers</Text>
-            </Badge>
-          </Card>
-          <Title level={4} style={{ textAlign: "center", marginTop: "12px" }}>
-            {stream?.title}
-          </Title>
-        </Col> */}
         <Col xs={12}>
           <Card
             title="Comments"
@@ -337,7 +268,9 @@ const LiveStream = () => {
               renderItem={(item) => (
                 <List.Item key={item.id} ref={messageEndRef}>
                   <List.Item.Meta
-                    avatar={<Avatar icon={<UserOutlined />} />}
+                    avatar={
+                      <Avatar icon={<UserOutlined />} src={item.avatar} />
+                    }
                     title={<Text strong>{item.sender}:</Text>}
                     description={item.text}
                   />
@@ -349,7 +282,6 @@ const LiveStream = () => {
                 overflowY: "scroll",
               }}
             />
-
             <Form
               onFinish={sendMessage}
               layout="inline"
@@ -370,7 +302,6 @@ const LiveStream = () => {
                 </Button>
               </Form.Item>
             </Form>
-
             <div
               style={{
                 marginTop: "16px",
@@ -378,14 +309,19 @@ const LiveStream = () => {
                 justifyContent: "space-between",
               }}
             >
-              {/* <LikeButton isLiked={like} /> */}
+              {stream && (
+                <LikeButton
+                  streamId={stream._id}
+                  userId={user?._id}
+                  likeCount={likeCount}
+                  like={like}
+                />
+              )}
               <ShareButton />
             </div>
           </Card>
         </Col>
       </Row>
-
-      {/* Comments Section */}
     </div>
   );
 };
