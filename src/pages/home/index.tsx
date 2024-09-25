@@ -62,9 +62,9 @@ const HomePage = () => {
     const fetchTopLikedStream = async () => {
       try {
         const response = await api.get(
-          "http://localhost:4000/api/stream/top1?type=like"
+          "http://localhost:4000/api/streams/top1?type=like"
         );
-        setTopLikedStream(response.data);
+        setTopLikedStream(response.data[0]);
         const cateRes = await api.get(
           "http://localhost:4000/api/streams/categories"
         );
