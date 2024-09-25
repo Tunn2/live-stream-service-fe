@@ -47,7 +47,6 @@ const HomePage = () => {
       try {
         const response = await api.get(
           `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
-          `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
         );
         setStreams(response.data.data.streams);
         setTotalPages(response.data.data.totalPages);
@@ -64,7 +63,7 @@ const HomePage = () => {
       try {
         const response = await api.get(
           "http://localhost:4000/api/streams/top1?type=like"
-          "http://localhost:4000/api/streams/top1?type=like"
+          
         );
         const topStream = Array.isArray(response.data)
         ? response.data[0] // If it's an array, use the first object
