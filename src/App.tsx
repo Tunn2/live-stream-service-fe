@@ -29,7 +29,7 @@ function App() {
           ),
         },
         {
-          path: "profile",
+          path: "profile/:userId",
           element: <Profile />,
         },
       ],
