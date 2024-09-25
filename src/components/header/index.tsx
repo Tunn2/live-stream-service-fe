@@ -166,7 +166,8 @@ function Header() {
         footer={
           <>
             <Button
-              type="primary"
+              type="text"
+              className="go-live-btn"
               onClick={() => {
                 liveForm.submit();
               }}
@@ -188,7 +189,7 @@ function Header() {
           </FormItem>
           <FormItem name="categories" label="Category">
             <Select
-              defaultValue={"Chưa chọn"}
+              defaultValue={"N/A"}
               options={categories.map((category) => {
                 return { value: category.name, label: category.name };
               })}

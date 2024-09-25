@@ -14,7 +14,7 @@ import {
   Skeleton,
   Modal,
 } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { CommentOutlined, EyeOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import Hls from "hls.js";
 import { useNavigate, useParams } from "react-router-dom";
 import LikeButton from "../../components/like-button";
@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
 import Title from "antd/es/typography/Title";
+import "./index.scss"
 
 const { Text } = Typography;
 const socket = io("http://localhost:4000");
@@ -213,7 +214,7 @@ const LiveStream = () => {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               />
-              {viewersCount} watching
+            <EyeOutlined/>  {viewersCount} watching
               <div style={{ marginTop: "16px", textAlign: "center" }}>
                 {user?._id === stream?.userId ? (
                   <Button
@@ -289,15 +290,15 @@ const LiveStream = () => {
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Nhập tin nhắn"
+                  placeholder="Type your message here"
                   onPressEnter={sendMessage} // Nhấn Enter để gửi tin nhắn
                   style={{ marginBottom: "10px" }}
                 />
               </Form.Item>
               <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Send
-                </Button>
+                <button className="submit-button" htmlType="submit">
+                  <CommentOutlined/>
+                </button>
               </Form.Item>
             </Form>
             <div
