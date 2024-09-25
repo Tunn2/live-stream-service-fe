@@ -11,9 +11,9 @@ import {
 } from "antd";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
-import "./home.css"; // Import the CSS file
+import "./home.scss"; // Import the CSS file
 import { EyeOutlined, LikeOutlined } from "@ant-design/icons";
-
+import stream from "../../img/stream.jpg";
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 const { Meta } = Card;
@@ -139,7 +139,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="top-liked-container">
-              <img src="/default_image.jpg" alt="Featured Stream" className="fallBack" />
+              <img src={stream} alt="Featured Stream" className="fallBack" />
               <div className="fallBack1">
                 <h2 className="fallbackH2">
                   No stream available yet, the most liked stream will be displayed here
@@ -208,15 +208,6 @@ const HomePage = () => {
               <Text>No streams available</Text>
             )}
           </Row>
-          <Pagination
-            align="center"
-            defaultCurrent={currentPage}
-            total={totalPages * 10}
-            onChange={(page) => {
-              setCurrentPage(page);
-            }}
-          />
-
           <Pagination
             align="center"
             defaultCurrent={currentPage}
