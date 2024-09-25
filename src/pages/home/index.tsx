@@ -13,7 +13,7 @@ import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
 import "./home.css"; // Import the CSS file
 import { EyeOutlined, LikeOutlined } from "@ant-design/icons";
-
+import stream from "../../img/stream.jpg"
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 const { Meta } = Card;
@@ -64,11 +64,17 @@ const HomePage = () => {
       try {
         const response = await api.get(
           "http://localhost:4000/api/streams/top1?type=like"
+          "http://localhost:4000/api/streams/top1?type=like"
         );
-        setTopLikedStream(response.data[0]);
+        const topStream = Array.isArray(response.data)
+        ? response.data[0] // If it's an array, use the first object
+        : response.data; // Otherwise, use the object directly
+      
+      setTopLikedStream(topStream);
         const cateRes = await api.get(
           "http://localhost:4000/api/streams/categories"
         );
+        
         setCategories(cateRes.data.data);
       } catch (error) {
         console.error("Error fetching top-liked stream:", error);
@@ -86,8 +92,10 @@ const HomePage = () => {
         <List
           itemLayout="vertical"
           dataSource={categories}
+          
           renderItem={(category) => (
-            <List.Item className="list-item-center">
+            <List.Item className="list-item-center" onClick={()=>navigate(`/category/${category.name}`)}>
+              <img src={category.image} alt="image" style={{width: "100%",height: "auto"}}/>
               <Text className="list-text">{category.name}</Text>
             </List.Item>
           )}
@@ -97,7 +105,7 @@ const HomePage = () => {
       {/* Main Content Section */} 
       <Layout className="sider" >
         <h2 className="title-center" ><span style={{borderBottom: "4px solid rgba(145, 71, 255, 1)"}}>TOP STREAM</span> </h2>
-        <Content style={{}}>
+        <Content style={{marginBottom: 100}}>
           {topLikedStream ? (
             <div className="top-liked-container">
               
@@ -140,7 +148,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="top-liked-container">
-              <img src="/default_image.jpg" alt="Featured Stream" className="fallBack" />
+              <img src={stream} alt="Featured Stream" className="fallBack" />
               <div className="fallBack1">
                 <h2 className="fallbackH2">
                   No stream available yet, the most liked stream will be displayed here
