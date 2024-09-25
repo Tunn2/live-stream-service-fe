@@ -20,7 +20,7 @@ import {
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
-import logo from "../../img/logo-color.png";
+import logo from "../../img/logo-white.png";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -129,7 +129,7 @@ function Header() {
     <div className="header">
       <div className="header__left">
         <Link to="/">
-          <img src={logo} alt="" />
+          <img src={logo} alt="" style={{width: "80%"}}/>
         </Link>
         <button
           style={{ width: 76 }}
@@ -155,7 +155,7 @@ function Header() {
         <button onClick={handleLogout}>Log out</button>
       </div>
 
-      <Modal
+      <Modal 
         open={isOpenLive}
         title="Create a live"
         onCancel={() => setIsOpenLive(false)}
@@ -172,6 +172,7 @@ function Header() {
             </Button>
           </>
         }
+        zIndex={1000}
       >
         <Form
           form={liveForm}
