@@ -47,6 +47,7 @@ const HomePage = () => {
       try {
         const response = await api.get(
           `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
+          `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
         );
         setStreams(response.data.data.streams);
         setTotalPages(response.data.data.totalPages);
@@ -62,6 +63,7 @@ const HomePage = () => {
     const fetchTopLikedStream = async () => {
       try {
         const response = await api.get(
+          "http://localhost:4000/api/streams/top1?type=like"
           "http://localhost:4000/api/streams/top1?type=like"
         );
         const topStream = Array.isArray(response.data)
@@ -179,6 +181,9 @@ const HomePage = () => {
                         <span className="live-badge">LIVE</span>
                       </div>
                     }
+                    onClick={() => {
+                      navigate(`/room/${stream._id}`);
+                    }}
                   >
                     <Meta
                       description={
