@@ -181,6 +181,25 @@ export default function Signup() {
                 required: true,
                 message: "Please input your password",
               },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (
+                    value.length >= 8 &&
+                    /[a-z]/.test(value) &&
+                    /[A-Z]/.test(value) &&
+                    /[0-9]/.test(value) &&
+                    /[!@#$%^&*]/.test(value)
+                  ) {
+                    return Promise.resolve();
+                  } else {
+                    return Promise.reject(
+                      new Error(
+                        "Password must be at least 8 characters and include at least one UPPERCASE, lowercase letter, number & symbol"
+                      )
+                    );
+                  }
+                },
+              }),
             ]}
           >
             <Input.Password
