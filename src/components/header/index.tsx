@@ -159,7 +159,7 @@ function Header() {
         <button onClick={handleLogout}>Log out</button>
       </div>
 
-      <Modal
+      <Modal 
         open={isOpenLive}
         title="Create a live"
         onCancel={() => setIsOpenLive(false)}
@@ -177,6 +177,7 @@ function Header() {
             </Button>
           </>
         }
+        zIndex={1000}
       >
         <Form
           form={liveForm}

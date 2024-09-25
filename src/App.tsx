@@ -7,6 +7,7 @@ import Signup from "./pages/signup";
 import Profile from "./pages/profile";
 import ProtectedRoute from "./ProtectedRoute";
 import Error from "./pages/error";
+import Category from "./pages/category";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -32,6 +33,10 @@ function App() {
           path: "profile/:userId",
           element: <Profile />,
         },
+        {
+          path: "/category/:category",
+          element: <Category/>
+        }
       ],
     },
     {

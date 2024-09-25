@@ -25,7 +25,6 @@ const HomePage = () => {
   const [pageSize, setPageSize] = useState(6);
   const [topLikedStream, setTopLikedStream] = useState(null);
   const [categories, setCategories] = useState([]);
-
   interface Stream {
     _id: string;
     title: string;
@@ -62,12 +61,18 @@ const HomePage = () => {
     const fetchTopLikedStream = async () => {
       try {
         const response = await api.get(
-          "http://localhost:4000/api/stream/top1?type=like"
+          "http://localhost:4000/api/streams/top1?type=like"
+          
         );
-        setTopLikedStream(response.data);
+        const topStream = Array.isArray(response.data)
+        ? response.data[0] // If it's an array, use the first object
+        : response.data; // Otherwise, use the object directly
+      
+      setTopLikedStream(topStream);
         const cateRes = await api.get(
           "http://localhost:4000/api/streams/categories"
         );
+        
         setCategories(cateRes.data.data);
       } catch (error) {
         console.error("Error fetching top-liked stream:", error);
@@ -87,8 +92,10 @@ const HomePage = () => {
         <List
           itemLayout="vertical"
           dataSource={categories}
+          
           renderItem={(category) => (
-            <List.Item className="list-item-center">
+            <List.Item className="list-item-center" onClick={()=>navigate(`/category/${category.name}`)}>
+              <img src={category.image} alt="image" style={{width: "100%",height: "auto"}}/>
               <Text className="list-text">{category.name}</Text>
             </List.Item>
           )}
