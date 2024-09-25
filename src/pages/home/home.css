@@ -8,25 +8,40 @@
   
   .sider {
     background: #fff;
+    height: 260vh;
+    overflow: scroll;
   }
   
   .title-center {
     text-align: center;
     background-color: white;
-    margin-bottom: 16px;
+    padding: 40px 0px;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.2666666666666666;
+    color: rgba(145, 71, 255, 1) !important;
   }
   
   .list-item-center {
     text-align: center;
     cursor: pointer;
-    background-color: white;
+    background-color: rgba(145, 71, 255, 1);
     overflow: hidden;
+    border-bottom: 1px solid rgb(210, 180, 255) !important;
   }
-  
+  .list-item-center:hover{
+    cursor: pointer;
+    background-color: rgb(49, 24, 85);
+    transition: 0.3s ease-in-out;
+  }
   .list-text {
-    background-color: white;
-    display: block;
-    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0px;
+    color: white;
+    
   }
   
   /* Top-liked stream section */
@@ -37,8 +52,7 @@
   
   .top-liked-image {
     width: 80%;
-    border-radius: 8px;
-    margin-bottom: 32px;
+    border-radius: 8px; 
     border: 2px solid black;
     margin: 0% 10%;
   }
@@ -47,16 +61,29 @@
     position: absolute;
     top: 2%;
     left: 12%;
-    background-color: #FF0800;
-    color: white;
+    background-color: rgba(0,0,0,0.7);
+    color: rgba(145, 71, 255, 1);
     padding: 5px 30px;
     border-radius: 5px;
     font-size: 22px;
     font-weight: bold;
     z-index: 1001;
-    border: 1px solid white;
+    border: 1px solid rgba(145, 71, 255, 1);
   }
   
+  .top-liked-banner2 {
+    position: absolute;
+    top: 2%;
+    left: 25%;
+    background-color: rgba(0,0,0,0.7);
+    color:rgba(145, 71, 255, 1);
+    padding: 5px 30px;
+    border-radius: 5px;
+    font-size: 22px;
+    font-weight: bold;
+    z-index: 1001;
+    border: 1px solid rgba(145, 71, 255, 1);
+  }
   .top-liked-bottom {
     position: absolute;
     bottom: 0%;
@@ -101,10 +128,28 @@
   .top-liked-button {
     width: 100%;
     color: rgb(210, 180, 255);
+    background-color: transparent;
     border-color: rgb(210, 180, 255);
     margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
   }
-  
+  .top-liked-button:hover {
+    width: 100%;
+    color: white;
+    background-color: rgba(145, 71, 255, 0.8);
+    border-color:  rgba(145, 71, 255, 0.8);
+    margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    transition: 0.3s ease-out;
+  }
   /* Featured streams section */
   .card-cover-image {
     height: 200px;
@@ -127,13 +172,14 @@
   
   .view-count {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    bottom: 10px;
+    right: 10px;
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
+    border: 1px solid white;
   }
   
   .avatar {
@@ -179,4 +225,15 @@
     backgroundColor: rgba(0,0,0,0.5);
      padding: 10px 20px;
       borderRadius: 5 
+  }
+  .space-between{
+    display: flex;
+    justify-content: space-between;
+  }
+  .splitter{
+    height: 10px;
+    background-color: rgba(145, 71, 255, 1);
+    border-radius: 5px;
+    width: 90%;
+    margin: 0% 5%;
   }
