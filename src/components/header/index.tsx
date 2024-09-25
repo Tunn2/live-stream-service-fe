@@ -2,6 +2,7 @@ import {
   Alert,
   Avatar,
   Button,
+  Flex,
   Form,
   Image,
   Input,
@@ -20,7 +21,8 @@ import {
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
-import logo from "../../img/logo-white.png";
+import logoColor from "../../img/logo-color.png";
+import logoWhite from "../../img/logo-white.png";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -129,17 +131,19 @@ function Header() {
     <div className="header">
       <div className="header__left">
         <Link to="/">
-          <img src={logo} alt="" style={{width: "80%"}}/>
+          <Image src={logoWhite} width={200} preview={false} />
         </Link>
         <button
-          style={{ width: 76 }}
           onClick={async () => {
             const response = await api.get("streams/categories");
             setCategories(response.data.data);
             setIsOpenLive(true);
           }}
         >
-          <VideoCameraOutlined />
+          <Flex justify="space-around" align="center" gap={10}>
+            <VideoCameraOutlined />
+            Go Live
+          </Flex>
         </button>
       </div>
       <div className="header__right">
@@ -162,7 +166,8 @@ function Header() {
         footer={
           <>
             <Button
-              type="primary"
+              type="text"
+              className="go-live-btn"
               onClick={() => {
                 liveForm.submit();
               }}
@@ -185,7 +190,7 @@ function Header() {
           </FormItem>
           <FormItem name="categories" label="Category">
             <Select
-              defaultValue={"Chưa chọn"}
+              defaultValue={"N/A"}
               options={categories.map((category) => {
                 return { value: category.name, label: category.name };
               })}
