@@ -35,17 +35,13 @@ function App() {
         },
         {
           path: "/category/:category",
-          element: <Category/>
-        }
+          element: <Category />,
+        },
+        {
+          path: "room/:id",
+          element: <LiveStream />,
+        },
       ],
-    },
-    {
-      path: "room/:id",
-      element: (
-        <ProtectedRoute>
-          <LiveStream />
-        </ProtectedRoute>
-      ),
     },
     {
       path: "login",
