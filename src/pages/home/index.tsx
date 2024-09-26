@@ -11,8 +11,8 @@ import {
 } from "antd";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
-import "./home.css"; // Import the CSS file
-import { EyeOutlined, LikeOutlined } from "@ant-design/icons";
+import "./home.scss"; // Import the CSS file
+import { EyeOutlined, FireOutlined, LikeOutlined } from "@ant-design/icons";
 import stream from "../../img/stream.jpg";
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -25,7 +25,6 @@ const HomePage = () => {
   const [pageSize, setPageSize] = useState(6);
   const [topLikedStream, setTopLikedStream] = useState(null);
   const [categories, setCategories] = useState([]);
-
   interface Stream {
     _id: string;
     title: string;
@@ -109,13 +108,13 @@ const HomePage = () => {
       </Sider>
 
       {/* Main Content Section */}
-      <Layout className="sider">
+      <Layout className="sider" style={{ overflowX: "hidden" }}>
         <h2 className="title-center">
-          <span style={{ borderBottom: "4px solid rgba(145, 71, 255, 1)" }}>
-            TOP STREAM
-          </span>{" "}
+          <span>
+            <FireOutlined /> TOP STREAM
+          </span>
         </h2>
-        <Content style={{ marginBottom: 100 }}>
+        <Content style={{}}>
           {topLikedStream ? (
             <div className="top-liked-container">
               <img
@@ -191,9 +190,7 @@ const HomePage = () => {
         {/* Featured Streams Section */}
         <Content>
           <h2 className="title-center">
-            <span style={{ borderBottom: "4px solid rgba(145, 71, 255, 1)" }}>
-              FEATURED STREAMS
-            </span>
+            <span>FEATURED STREAMS</span>
           </h2>
           <Row gutter={[16, 16]}>
             {streams.length > 0 ? (
@@ -256,7 +253,6 @@ const HomePage = () => {
                             </div>
                           </div>
                           <br />
-                          <strong>Categories:</strong>
                           <ul>
                             {stream.categories.map((category, index) => (
                               <li key={index}>{category}</li>
@@ -272,9 +268,9 @@ const HomePage = () => {
               <Text>No streams available</Text>
             )}
           </Row>
-
           <Pagination
             align="center"
+            style={{ marginTop: "20px" }}
             defaultCurrent={currentPage}
             total={totalPages * 10}
             onChange={(page) => {
