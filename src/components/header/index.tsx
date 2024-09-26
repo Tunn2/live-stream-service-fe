@@ -152,7 +152,7 @@ function Header() {
           }}
           style={{ cursor: "pointer" }}
         />
-        <button onClick={handleLogout}>Log out</button>
+        <button style={{color: "white", backgroundColor: "red"}}onClick={handleLogout}>Log out</button>
       </div>
 
       <Modal 
