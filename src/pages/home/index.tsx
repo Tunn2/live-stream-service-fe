@@ -162,7 +162,6 @@ const HomePage = () => {
                     </Row>
                     <button
                       type="default"
-                      ghost
                       className="top-liked-button"
                       onClick={() => {
                         navigate(`/room/${topLikedStream._id}`);

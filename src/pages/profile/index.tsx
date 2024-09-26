@@ -131,7 +131,16 @@ export default function Profile() {
 
   useEffect(() => {
     handleGetUserById();
-  }, []);
+  }, [userId]);
+
+  useEffect(() => {
+    if (user) {
+      form.setFieldsValue({
+        name: user.name,
+        bio: user.bio,
+      });
+    }
+  }, [user, form]);
 
   const styles = {
     container: {
@@ -175,16 +184,17 @@ export default function Profile() {
     });
   };
   return (
-    <section style={user1._id === userId ? styles.section : {}}>
+    <section>
       {user && (
-        <div
-          style={user1._id === userId ? styles.container : {}}
-          className={user1._id === userId ? "" : "profile-container-someone"}
-        >
-          <div
-            style={user1._id === userId ? styles.header : {}}
-            className={user1._id === userId ? "" : "Other-image"}
-          >
+        <div className="name-container">
+          <span className="name-gradient">
+            {user1._id === userId ? "Your" : `${user.name}'s`} Profile
+          </span>
+        </div>
+      )}
+      {user && (
+        <div className="profile-container-someone">
+          <div className="Other-image">
             <input
               type="file"
               ref={fileInputRef}
@@ -196,7 +206,7 @@ export default function Profile() {
               size={300}
               icon={<UserOutlined />}
               src={fileList.length > 0 ? fileList[0].url : user?.avatarUrl}
-              className={user1._id === userId ? "" : "Other-image-inside"}
+              className="Other-image-inside"
               onClick={() => {
                 user1._id === userId && disable === false
                   ? fileInputRef.current.click()
@@ -212,7 +222,7 @@ export default function Profile() {
             requiredMark="optional"
             encType="multipart/form-data"
             initialValues={user}
-            className={user1._id === userId ? "" : "someone-form"}
+            className="someone-form"
           >
             <Form.Item
               name="name"
@@ -232,118 +242,131 @@ export default function Profile() {
             >
               <Input.TextArea rows={1} disabled={disable} />
             </Form.Item>
-            {user1._id !== userId && (
-              <>
-                <h3>
-                  Status:{" "}
-                  <span
-                    className={
-                      user.isActive === true ? "Active-User" : "Inactive-User"
-                    }
-                  >
-                    {user.isActive === true ? "Active User" : "Inactive User"}
-                  </span>
-                </h3>
-                <h4 className="join-date">
-                  This user has joined since {formatJoinDate(user.createdAt)}
-                </h4>
-                <br />
 
-                <div>
-                  <Row>
-                    <Col span={12}>
-                      <div
-                        className="box"
-                        onClick={() => {
-                          toast(
-                            `This user has ${
-                              user.totalLikes || 0
-                            } likes from all of their streams`,
-                            {
-                              position: "top-right",
-                              autoClose: 5000,
-                              hideProgressBar: false,
-                              closeOnClick: true,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                              theme: "light",
-                              transition: Bounce,
-                            }
-                          );
-                        }}
-                      >
-                        <>
-                          <h2 style={{ textAlign: "center" }}>Likes: </h2>
-                          <h2 style={{ fontSize: 30, textAlign: "center" }}>
-                            {user.totalLikes || 0} <LikeFilled />
-                          </h2>
-                        </>
-                      </div>
-                    </Col>
-                    <Col span={12}>
-                      <div
-                        className="box"
-                        onClick={() => {
-                          toast(
-                            `This user has ${
-                              user.formDatallower || 0
-                            } followers`,
-                            {
-                              position: "top-right",
-                              autoClose: 5000,
-                              hideProgressBar: false,
-                              closeOnClick: true,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                              theme: "light",
-                              transition: Bounce,
-                            }
-                          );
-                        }}
-                      >
-                        <>
-                          <h2 style={{ textAlign: "center" }}>Followers: </h2>{" "}
-                          <h2 style={{ fontSize: 30, textAlign: "center" }}>
-                            {user.follower || 0} <UsergroupAddOutlined />
-                          </h2>
-                        </>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
-              </>
-            )}
+            <>
+              <h3>
+                Status:{" "}
+                <span
+                  className={
+                    user.isActive === true ? "Active-User" : "Inactive-User"
+                  }
+                >
+                  {user.isActive === true ? "Active User" : "Inactive User"}
+                </span>
+              </h3>
+              <h4 className="join-date">
+                {user1._id === userId ? "You have" : "This user has"} joined
+                since {formatJoinDate(user.createdAt)}
+              </h4>
+              <br />
+
+              <div>
+                <Row>
+                  <Col span={12}>
+                    <div
+                      className="box"
+                      onClick={() => {
+                        toast(
+                          `${
+                            user1._id === userId ? "You have" : "This user has"
+                          } ${user.totalLikes || 0} likes from all of ${
+                            user1._id === userId ? "your" : "their"
+                          } streams`,
+                          {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            transition: Bounce,
+                          }
+                        );
+                      }}
+                    >
+                      <>
+                        <h2 style={{ textAlign: "center" }}>Likes: </h2>
+                        <h2 style={{ fontSize: 30, textAlign: "center" }}>
+                          {user.totalLikes || 0} <LikeFilled />
+                        </h2>
+                      </>
+                    </div>
+                  </Col>
+                  <Col span={12}>
+                    <div
+                      className="box"
+                      onClick={() => {
+                        toast(
+                          `${
+                            user1._id === userId ? "You have" : "This user has"
+                          } ${user.formDatallower || 0} followers`,
+                          {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            transition: Bounce,
+                          }
+                        );
+                      }}
+                    >
+                      <>
+                        <h2 style={{ textAlign: "center" }}>Followers: </h2>{" "}
+                        <h2 style={{ fontSize: 30, textAlign: "center" }}>
+                          {user.follower || 0} <UsergroupAddOutlined />
+                        </h2>
+                      </>
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            </>
 
             {user1._id === userId && (
               <>
                 <Form.Item>
-                  <Button
-                    block
-                    onClick={() => setDisable(false)}
-                    style={{ marginBottom: "20px" }}
+                  <Row
+                    style={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    block
-                    type="primary"
-                    htmlType="submit"
-                    loading={loading}
-                    disabled={disable || loading}
-                    style={{ marginBottom: "20px" }}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    block
-                    danger
-                    onClick={handleCancel}
-                    disabled={disable || loading}
-                  >
-                    Cancel
-                  </Button>
+                    <Col span={8} style={{ padding: "0px 20px" }}>
+                      <Button
+                        block
+                        onClick={() => setDisable(false)}
+                        style={{ margin: "10px 0px" }}
+                      >
+                        Edit
+                      </Button>
+                    </Col>
+                    <Col span={8} style={{ padding: "0px 20px" }}>
+                      <Button
+                        block
+                        type="primary"
+                        htmlType="submit"
+                        loading={loading}
+                        disabled={disable || loading}
+                        style={{ margin: "10px 0px" }}
+                      >
+                        Save
+                      </Button>
+                    </Col>
+                    <Col span={8} style={{ padding: "0px 20px" }}>
+                      <Button
+                        block
+                        danger
+                        onClick={handleCancel}
+                        disabled={disable || loading}
+                        style={{ margin: "10px 0px" }}
+                      >
+                        Cancel
+                      </Button>
+                    </Col>
+                  </Row>
                 </Form.Item>
               </>
             )}
