@@ -115,7 +115,7 @@ export default function Category() {
                             <div
                               className="stream-info-text"
                               onClick={() => {
-                                navigate(`/profile/${stream.userId._id}`);
+                                navigate(`/profile/${stream.userId}`);
                               }}
                             >
                               <img
