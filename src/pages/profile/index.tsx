@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Avatar,
   Button,
+  Flex,
   Form,
   Grid,
   Image,
@@ -9,14 +10,11 @@ import {
   theme,
   Typography,
 } from "antd";
-import {
-  UserOutlined,
-} from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/features/userSlice";
-
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Title } = Typography;
@@ -45,13 +43,15 @@ export default function Profile() {
   const handleFileInputChange = (e) => {
     const files = e.target.files;
     if (files.length > 0) {
-      const newFileList = [{
-        uid: files[0].name,
-        name: files[0].name,
-        status: 'done',
-        url: URL.createObjectURL(files[0]),
-        originFileObj: files[0],
-      }];
+      const newFileList = [
+        {
+          uid: files[0].name,
+          name: files[0].name,
+          status: "done",
+          url: URL.createObjectURL(files[0]),
+          originFileObj: files[0],
+        },
+      ];
       setFileList(newFileList);
     }
   };
@@ -96,7 +96,9 @@ export default function Profile() {
   const styles = {
     container: {
       margin: "0 auto",
-      padding: screens.md ? `${token.paddingXL}px` : `${token.paddingXL}px ${token.padding}px`,
+      padding: screens.md
+        ? `${token.paddingXL}px`
+        : `${token.paddingXL}px ${token.padding}px`,
       width: "380px",
     },
     header: {
@@ -124,11 +126,11 @@ export default function Profile() {
             accept="image/*"
             onChange={handleFileInputChange}
           />
-          <Avatar
-            size={64}
-            icon={<UserOutlined />}
+          <Image
+            width={150}
+            style={{ cursor: "pointer", borderRadius: "50%" }}
             src={fileList.length > 0 ? fileList[0].url : user?.avatarUrl}
-            style={{ cursor: "pointer" }}
+            preview={{ mask: <p>Preview & Change your image</p> }}
             onClick={() => fileInputRef.current.click()} // Trigger file input
           />
         </div>
@@ -146,7 +148,11 @@ export default function Profile() {
             label="Name"
             rules={[{ required: true, message: "Please input your Name!" }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Name" disabled={disable} />
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Name"
+              disabled={disable}
+            />
           </Form.Item>
           <Form.Item
             name="bio"
@@ -156,15 +162,34 @@ export default function Profile() {
             <Input.TextArea rows={1} disabled={disable} />
           </Form.Item>
           <Form.Item>
-            <Button block onClick={() => setDisable(false)} style={{ marginBottom: "20px" }} disabled={loading}>
-              Edit
-            </Button>
-            <Button block type="primary" htmlType="submit" loading={loading} disabled={disable || loading} style={{ marginBottom: "20px" }}>
-              Save
-            </Button>
-            <Button block danger onClick={handleCancel} disabled={disable || loading}>
-              Cancel
-            </Button>
+            <Flex vertical justify="space-between" gap={20}>
+              <Button
+                block
+                onClick={() => setDisable(false)}
+                disabled={loading}
+              >
+                Edit
+              </Button>
+              <Button
+                block
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={disable || loading}
+                style={{ display: disable ? "none" : "block" }}
+              >
+                Save
+              </Button>
+              <Button
+                block
+                danger
+                onClick={handleCancel}
+                disabled={disable || loading}
+                style={{ display: disable ? "none" : "block" }}
+              >
+                Cancel
+              </Button>
+            </Flex>
           </Form.Item>
         </Form>
         {previewImage && (

@@ -131,7 +131,7 @@ export default function Login() {
             </Button>
             <div style={styles.footer}>
               <Text style={styles.text}>Don't have an account?</Text>{" "}
-              <Link href="/signup">Sign up now</Link>
+              <Link href="/signup">Sign up</Link>
             </div>
           </Form.Item>
         </Form>
