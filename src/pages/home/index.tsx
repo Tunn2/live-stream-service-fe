@@ -62,17 +62,16 @@ const HomePage = () => {
       try {
         const response = await api.get(
           "http://localhost:4000/api/streams/top1?type=like"
-          
         );
         const topStream = Array.isArray(response.data)
-        ? response.data[0] // If it's an array, use the first object
-        : response.data; // Otherwise, use the object directly
-      
-      setTopLikedStream(topStream);
+          ? response.data[0] // If it's an array, use the first object
+          : response.data; // Otherwise, use the object directly
+
+        setTopLikedStream(topStream);
         const cateRes = await api.get(
           "http://localhost:4000/api/streams/categories"
         );
-        
+
         setCategories(cateRes.data.data);
       } catch (error) {
         console.error("Error fetching top-liked stream:", error);
@@ -86,16 +85,22 @@ const HomePage = () => {
     <Layout className="layout">
       {/* Categories Section */}
       <Sider width={240} className="sider">
-        <Title level={5} className="title-center">
-          Categories
+        <Title level={5} className="title-center2">
+          CATEGORIES
         </Title>
         <List
           itemLayout="vertical"
           dataSource={categories}
-          
           renderItem={(category) => (
-            <List.Item className="list-item-center" onClick={()=>navigate(`/category/${category.name}`)}>
-              <img src={category.image} alt="image" style={{width: "100%",height: "auto"}}/>
+            <List.Item
+              className="list-item-center"
+              onClick={() => navigate(`/category/${category.name}`)}
+            >
+              <img
+                src={category.image}
+                alt="image"
+                style={{ width: "100%", height: "auto" }}
+              />
               <Text className="list-text">{category.name}</Text>
             </List.Item>
           )}
@@ -103,7 +108,7 @@ const HomePage = () => {
       </Sider>
 
       {/* Main Content Section */}
-      <Layout className="sider" style={{overflowX:"hidden"}}>
+      <Layout className="sider" style={{ overflowX: "hidden" }}>
         <h2 className="title-center">
           <span>
             <FireOutlined /> TOP STREAM
@@ -228,7 +233,21 @@ const HomePage = () => {
                             </div>
                             <div>
                               <span>
-                                <strong>{stream.title}</strong> <br />
+                                <strong
+                                  onClick={() => {
+                                    navigate(`/room/${stream._id}`);
+                                  }}
+                                >
+                                  {stream.title}
+                                </strong>{" "}
+                                <br />
+                              </span>
+                              <span
+                                onClick={() => {
+                                  navigate(`/profile/${stream.userId._id}`);
+                                }}
+                              >
+                                {" "}
                                 {stream.userId.name}
                               </span>
                             </div>
