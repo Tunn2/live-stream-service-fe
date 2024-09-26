@@ -85,8 +85,8 @@ const HomePage = () => {
     <Layout className="layout">
       {/* Categories Section */}
       <Sider width={240} className="sider">
-        <Title level={5} className="title-center">
-          Categories
+        <Title level={5} className="title-center2">
+          CATEGORIES
         </Title>
         <List
           itemLayout="vertical"
