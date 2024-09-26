@@ -27,7 +27,9 @@ export default function Login() {
     console.log(values);
 
     try {
+      localStorage.setItem("skipValidation", "skip");
       response = await api.post("auth/login", values);
+      localStorage.removeItem("skipValidation");
       const token = response.data.accessToken;
       localStorage.setItem("token", token);
       const { _id } = jwtDecode(token);

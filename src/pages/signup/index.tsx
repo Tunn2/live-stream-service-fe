@@ -65,11 +65,14 @@ export default function Signup() {
     }
 
     try {
+      localStorage.setItem("skipValidation", "skip");
       response = await api.post("auth/signup", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+      localStorage.removeItem("skipValidation");
+
       setFileList([]);
       navigate("/login");
       toast.success("Sign up successfully");
