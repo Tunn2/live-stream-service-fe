@@ -7,4 +7,5 @@ export interface User {
   updatedAt: string;
   bio: string;
   isActive: true;
+  verify: boolean;
 }
