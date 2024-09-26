@@ -9,8 +9,8 @@
 }
 
 .sider {
-  background: #fff;
-  height: 260vh;
+  background: #fff !important;
+  height: 280vh;
   overflow: scroll;
 }
 
@@ -24,17 +24,27 @@
   line-height: 1.2666666666666666;
   color: $primary-color !important;
 }
+.title-center2 {
+  text-align: center;
+  background-color: white;
+  padding: 40px 0px;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  font-size: 22px !important;
+  line-height: 1.2666666666666666;
+  color: $primary-color !important;
+}
 
 .list-item-center {
   text-align: center;
   cursor: pointer;
-  background-color: $primary-color;
+  background-color: white;
   overflow: hidden;
   border-bottom: 1px solid rgb(210, 180, 255) !important;
 }
 .list-item-center:hover {
   cursor: pointer;
-  background-color: rgb(49, 24, 85);
+  background-color:  rgb(218, 218, 218);
   transition: 0.3s ease-in-out;
 }
 .list-text {
@@ -42,7 +52,9 @@
   justify-content: center;
   align-items: center;
   padding: 4px 0px;
-  color: white;
+  color: $primary-color;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 /* Top-liked stream section */
@@ -68,7 +80,7 @@
   border-radius: 5px;
   font-size: 22px;
   font-weight: bold;
-  z-index: 1001;
+  z-index: 500;
   border: 1px solid $primary-color;
 }
 
@@ -82,7 +94,7 @@
   border-radius: 5px;
   font-size: 22px;
   font-weight: bold;
-  z-index: 1001;
+  z-index: 500;
   border: 1px solid $primary-color;
 }
 .top-liked-bottom {
@@ -92,7 +104,7 @@
   right: 0;
   display: flex;
   justify-content: center;
-  z-index: 1000;
+  z-index: 500;
 }
 
 .top-liked-details {
