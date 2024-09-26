@@ -24,10 +24,10 @@ export default function Login() {
 
   const onFinish = async (values) => {
     let response = null;
-    console.log(values);
-
+    localStorage.setItem("skipValidation", "skip");
     try {
       response = await api.post("auth/login", values);
+      localStorage.removeItem("skipValidation");
       const token = response.data.accessToken;
       localStorage.setItem("token", token);
       const { _id } = jwtDecode(token);

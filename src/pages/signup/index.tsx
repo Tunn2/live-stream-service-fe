@@ -63,6 +63,7 @@ export default function Signup() {
     if (fileList.length > 0) {
       formData.append("avatar", fileList[0].originFileObj);
     }
+    localStorage.setItem("skipValidation", "skip");
 
     try {
       response = await api.post("auth/signup", formData, {
@@ -70,6 +71,7 @@ export default function Signup() {
           "Content-Type": "multipart/form-data",
         },
       });
+      localStorage.removeItem("skipValidation");
       setFileList([]);
       navigate("/login");
       toast.success("Sign up successfully");
