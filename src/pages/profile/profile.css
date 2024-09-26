@@ -1,0 +1,94 @@
+/* Flexbox layout for someone else's profile */
+.profile-container-someone {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 20px; /* Adds space between avatar and form */
+  }
+  
+  /* Avatar styling for someone else's profile */
+  .Other-image {
+    width: 400px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgb(197, 197, 197);
+    border-radius: 20px;
+    background-color: white;
+  }
+  .Other-image-inside{
+    width: fit-content
+  }
+  /* Form section for someone else's profile */
+  .someone-form {
+    flex-grow: 1;
+  }
+  
+  /* Box styling with hover effect */
+  .box {
+    background-color: transparent;
+    color: rgba(145, 71, 255, 1);
+    width: 90%;
+    border-radius: 20px;
+    box-shadow: 0px 3px 8px rgba(145, 71, 255, 1);
+    padding: 5px 10px;
+    margin: 20px 5%;
+    cursor: pointer;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+  }
+  
+  .box:hover {
+    background-color: rgba(145, 71, 255, 1);
+    color: white;
+    transition: 0.5s ease-in-out;
+  }
+  
+  .Active-User{
+    color: #7FFF00;
+    border: 1px solid #7FFF00;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background-color: white;
+    font-size: medium;
+    box-shadow: 0px 1px 2px #7FFF00;
+    
+  }
+
+  .Inactive-User{
+    color: #FF0800;
+    border: 1px solid #FF0800;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: white;
+    font-size: medium;
+    box-shadow: 0px 1px 2px #FF0800;
+  }/*API blocked inactive user 0.o*/
+
+  .join-date{
+    margin-top: 30px;
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .name-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    width: 100%; /* Ensure it takes the full width */
+  }
+  
+  .name-gradient {
+    background-image: linear-gradient(43deg, rgba(0, 0, 255, 1) 0%, rgba(145, 71, 255, 1) 50%, rgb(255, 0, 0) 100%);
+    text-align: center;
+    font-weight: 1000 !important;
+    font-size: 50px;
+    margin: 30px 0px;
+    background-clip: text;
+    color: transparent;
+  }
+  
