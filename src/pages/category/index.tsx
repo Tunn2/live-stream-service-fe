@@ -120,14 +120,14 @@ export default function Category() {
                             >
                               <img
                                 alt="avatar"
-                                src={stream.userId.avatarUrl}
+                                src={stream.userDetails.avatarUrl}
                                 className="avatar"
                               />
                             </div>
                             <div>
                               <span>
                                 <strong>{stream.title}</strong> <br />
-                                {stream.userId.name}
+                                {stream.userDetails.name}
                               </span>
                             </div>
                           </div>

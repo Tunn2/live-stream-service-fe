@@ -1,8 +1,8 @@
 @import "../../ui/variables.scss";
 
-/* home.css */
+/* home.scss */
 
-/* Layout styling */
+/* Global Layout */
 .layout {
   padding: 20px;
   gap: 20px;
@@ -10,29 +10,103 @@
 
 .sider {
   background: #fff !important;
-  height: 280vh;
-  overflow: scroll;
+  height: 250vh;
 }
 
-.title-center {
-  text-align: center;
-  background-color: white;
-  padding: 40px 0px;
-  margin-bottom: 0.5em;
-  font-weight: 600;
-  font-size: 30px;
-  line-height: 1.2666666666666666;
-  color: $primary-color !important;
+.splitter {
+  height: 10px;
+  background-color: $primary-color;
+  border-radius: 5px;
+  width: 90%;
+  margin: 0% 5%;
 }
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* -- Top Section (Top Streamers) -- */
+.top-section {
+  background-color: #2e2e3a; /* Slightly lighter background for contrast */
+  padding: 15px;
+  max-height: 100vh;
+  overflow-y: scroll;
+}
+
+.title-center3 {
+  text-align: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #6a5acd;
+  font-weight: 700;
+  font-size: 18px;
+  width: 300px;
+  color: #ffd700 !important; /* Bright color to stand out */
+}
+
+.list-item-streamers {
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  background-color: #3a3a4a; /* Lighter than the section */
+  margin-bottom: 8px;
+  border: 1px solid #6a5acd; /* Border to make items distinct */
+  box-shadow: 0px 3px 8px #6a5acd;
+}
+
+.list-item-streamers:hover {
+  background-color: #514d63;
+  transform: scale(1.02);
+}
+
+.streamers-name {
+  font-size: 16px;
+  color: #e6e6fa; /* Light color for readability */
+  margin: 0;
+}
+
+.total-like {
+  font-weight: 500;
+  color: #dcdcdc;
+  font-size: 12px;
+  margin: 5px 0 0;
+}
+
+.total-like span {
+  color: #00aaff; /* Make the number pop */
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #ffd700;
+  box-shadow: 0px 3px 8px rgba(255, 215, 0, 0.5);
+  object-fit: cover;
+}
+
+/* -- Bottom Section (Categories) -- */
+.bottom-section {
+  height: 175vh;
+  overflow: scroll;
+  
+}
+
 .title-center2 {
   text-align: center;
-  background-color: white;
-  padding: 40px 0px;
+  padding: 80px 0px;
   margin-bottom: 0.5em;
-  font-weight: 600;
+  position: absolute;
+  z-index: 500;
+  width: 335px;
+  font-weight: 650 !important;
   font-size: 22px !important;
   line-height: 1.2666666666666666;
-  color: $primary-color !important;
+  color: rgb(210, 180, 255) !important;
+  background: linear-gradient(180deg, #2e2e3a 0%, #9147ff 50%, #eaeaea 80%, #fff 100%);
 }
 
 .list-item-center {
@@ -42,11 +116,13 @@
   overflow: hidden;
   border-bottom: 1px solid rgb(210, 180, 255) !important;
 }
+
 .list-item-center:hover {
   cursor: pointer;
-  background-color:  rgb(218, 218, 218);
+  background-color: rgb(218, 218, 218);
   transition: 0.3s ease-in-out;
 }
+
 .list-text {
   display: flex;
   justify-content: center;
@@ -57,7 +133,11 @@
   font-weight: 600;
 }
 
-/* Top-liked stream section */
+.list {
+  margin-top: 200px;
+}
+
+/* -- Main Content (Top Liked Stream) -- */
 .top-liked-container {
   position: relative;
   width: 100%;
@@ -96,7 +176,9 @@
   font-weight: bold;
   z-index: 500;
   border: 1px solid $primary-color;
+  cursor: pointer;
 }
+
 .top-liked-bottom {
   position: absolute;
   bottom: 0%;
@@ -150,6 +232,7 @@
   font-size: 18px;
   font-weight: 600;
 }
+
 .top-liked-button:hover {
   width: 100%;
   color: white;
@@ -163,7 +246,8 @@
   font-weight: 600;
   transition: 0.3s ease-out;
 }
-/* Featured streams section */
+
+/* -- Featured Streams -- */
 .card-cover-image {
   height: 200px;
   width: 100%;
@@ -220,22 +304,25 @@
   display: inline-block;
   vertical-align: middle;
 }
+
 .fallBack {
   width: 100%;
-  borderradius: 8px;
+  border-radius: 8px;
 }
+
 .fallBack1 {
   position: absolute;
   bottom: 10%;
   left: 0;
   right: 0;
   display: flex;
-  justifycontent: center;
-  zindex: 1000;
+  justify-content: center;
+  z-index: 1000;
 }
+
 .fallBackH2 {
   color: white;
-  backgroundcolor: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   borderradius: 5;
 }

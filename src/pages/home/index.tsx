@@ -12,7 +12,12 @@ import {
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
 import "./home.scss"; // Import the CSS file
-import { EyeOutlined, FireOutlined, LikeOutlined } from "@ant-design/icons";
+import {
+  CrownOutlined,
+  EyeOutlined,
+  FireOutlined,
+  LikeOutlined,
+} from "@ant-design/icons";
 import stream from "../../img/stream.jpg";
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -25,6 +30,7 @@ const HomePage = () => {
   const [pageSize, setPageSize] = useState(6);
   const [topLikedStream, setTopLikedStream] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [topStreamers, setTopStreamers] = useState([]);
   interface Stream {
     _id: string;
     title: string;
@@ -71,8 +77,9 @@ const HomePage = () => {
         const cateRes = await api.get(
           "http://localhost:4000/api/streams/categories"
         );
-
         setCategories(cateRes.data.data);
+        const topStreamers = await api.get("users/topUser?top=5");
+        setTopStreamers(topStreamers.data.data);
       } catch (error) {
         console.error("Error fetching top-liked stream:", error);
       }
@@ -84,27 +91,66 @@ const HomePage = () => {
   return (
     <Layout className="layout">
       {/* Categories Section */}
-      <Sider width={240} className="sider">
-        <Title level={5} className="title-center2">
-          CATEGORIES
-        </Title>
-        <List
-          itemLayout="vertical"
-          dataSource={categories}
-          renderItem={(category) => (
-            <List.Item
-              className="list-item-center"
-              onClick={() => navigate(`/category/${category.name}`)}
-            >
-              <img
-                src={category.image}
-                alt="image"
-                style={{ width: "100%", height: "auto" }}
-              />
-              <Text className="list-text">{category.name}</Text>
-            </List.Item>
-          )}
-        />
+      <Sider width={350} className="sider">
+        <div className="top-section">
+          <Title level={5} className="title-center3">
+            TOP STREAMERS <CrownOutlined />
+          </Title>
+          <List
+            itemLayout="vertical"
+            dataSource={topStreamers}
+            renderItem={(streamers) => (
+              <List.Item
+                className="list-item-streamers"
+                onClick={() => navigate(`/profile/${streamers._id}`)}
+              >
+                <Row align="middle">
+                  <Col span={6}>
+                    <img
+                      src={streamers.avatarUrl}
+                      alt={`${streamers.name} avatar`}
+                      className="avatar"
+                    />
+                  </Col>
+                  <Col span={18} className="info-container">
+                    <h5 className="streamers-name">
+                      {streamers.name} <CrownOutlined />
+                    </h5>
+                    <h5 className="total-like">
+                      Total likes: <span>{streamers.totalLikes}</span>{" "}
+                      <LikeOutlined />
+                    </h5>
+                  </Col>
+                </Row>
+              </List.Item>
+            )}
+          />
+        </div>
+
+        {/* Bottom Half - Categories */}
+        <div className="bottom-section">
+          <Title level={5} className="title-center2">
+            CATEGORIES
+          </Title>
+          <List
+            className="list"
+            itemLayout="vertical"
+            dataSource={categories}
+            renderItem={(category) => (
+              <List.Item
+                className="list-item-center"
+                onClick={() => navigate(`/category/${category.name}`)}
+              >
+                <img
+                  src={category.image}
+                  alt="image"
+                  style={{ width: "100%", height: "auto" }}
+                />
+                <Text className="list-text">{category.name}</Text>
+              </List.Item>
+            )}
+          />
+        </div>
       </Sider>
 
       {/* Main Content Section */}
@@ -123,7 +169,12 @@ const HomePage = () => {
                 className="top-liked-image"
               />
               <div className="top-liked-banner">Trendy</div>
-              <div className="top-liked-banner2">
+              <div
+                className="top-liked-banner2"
+                onClick={() => {
+                  navigate(`/category/${topLikedStream.categories[0]}`);
+                }}
+              >
                 {topLikedStream.categories[0]}
               </div>
               <div className="top-liked-bottom">
@@ -254,7 +305,14 @@ const HomePage = () => {
                           <br />
                           <ul>
                             {stream.categories.map((category, index) => (
-                              <li key={index}>{category}</li>
+                              <li
+                                key={index}
+                                onClick={() =>
+                                  navigate(`/category/${category}`)
+                                }
+                              >
+                                {category}
+                              </li>
                             ))}
                           </ul>
                         </>
