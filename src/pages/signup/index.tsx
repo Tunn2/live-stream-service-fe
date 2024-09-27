@@ -55,7 +55,6 @@ export default function Signup() {
 
   const onFinish = async (values) => {
     let response = null;
-
     const formData = new FormData();
     Object.keys(values).forEach((key) => {
       formData.append(key, values[key]);
@@ -65,13 +64,16 @@ export default function Signup() {
     }
 
     try {
+      localStorage.setItem("skipValidation", "skip");
       response = await api.post("auth/signup", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+      localStorage.removeItem("skipValidation");
+
       setFileList([]);
-      navigate("/login");
+      navigate("/verify", { state: { email: values.email } });
       toast.success("Sign up successfully");
     } catch (error: any) {
       toast.error(error.response?.data.error);
@@ -152,6 +154,7 @@ export default function Signup() {
         >
           <Form.Item
             name="name"
+            label="Name"
             rules={[
               {
                 required: true,
@@ -163,6 +166,7 @@ export default function Signup() {
           </Form.Item>
           <Form.Item
             name="email"
+            label="Email"
             rules={[
               {
                 type: "email",

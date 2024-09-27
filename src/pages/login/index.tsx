@@ -27,7 +27,9 @@ export default function Login() {
     console.log(values);
 
     try {
+      localStorage.setItem("skipValidation", "skip");
       response = await api.post("auth/login", values);
+      localStorage.removeItem("skipValidation");
       const token = response.data.accessToken;
       localStorage.setItem("token", token);
       const { _id } = jwtDecode(token);
@@ -131,7 +133,7 @@ export default function Login() {
             </Button>
             <div style={styles.footer}>
               <Text style={styles.text}>Don't have an account?</Text>{" "}
-              <Link href="/signup">Sign up now</Link>
+              <Link href="/signup">Sign up</Link>
             </div>
           </Form.Item>
         </Form>
