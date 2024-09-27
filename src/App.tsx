@@ -11,6 +11,7 @@ import Category from "./pages/category";
 import Verify from "./pages/verify";
 import VerifyFail from "./pages/verify/fail";
 import VerifySuccess from "./pages/verify/success";
+import ResetPassword from "./pages/resetPassword";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -65,6 +66,10 @@ function App() {
     {
       path: "verify/fail",
       element: <VerifyFail />,
+    },
+    {
+      path:"reset-password/:token",
+      element:<ResetPassword/>
     },
     {
       path: "error",
