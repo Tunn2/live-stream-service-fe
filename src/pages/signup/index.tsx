@@ -62,7 +62,6 @@ export default function Signup() {
     if (fileList.length > 0) {
       formData.append("avatar", fileList[0].originFileObj);
     }
-    localStorage.setItem("skipValidation", "skip");
 
     try {
       localStorage.setItem("skipValidation", "skip");
@@ -71,7 +70,6 @@ export default function Signup() {
           "Content-Type": "multipart/form-data",
         },
       });
-      localStorage.removeItem("skipValidation");
       setFileList([]);
       navigate("/verify", { state: { email: values.email } });
       toast.success("Sign up successfully");
