@@ -198,7 +198,7 @@ export default function Signup() {
                   } else {
                     return Promise.reject(
                       new Error(
-                        "Password must be at least 8 characters and include at least one UPPERCASE, lowercase letter, number & symbol"
+                        "Password must be at least 8 characters and include at least a number, symbol, UPPERCASE & lowercase letter"
                       )
                     );
                   }
