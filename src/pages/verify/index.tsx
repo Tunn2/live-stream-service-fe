@@ -1,20 +1,38 @@
 import { Button, Flex, Image } from "antd";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import logo from "../../img/logo-color.png";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import axios from "axios";
-import { logout } from "../../redux/features/userSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 export default function Verify() {
   const locationState = useLocation()?.state || {};
   const { email } = locationState;
   const user = useSelector((store) => store.user);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [timer, setTimer] = useState(30);
 
   const resendEmail = (email) => {
     axios.get(`http://localhost:4000/api/auth/verify/resend?email=${email}`);
+    setIsButtonDisabled(true);
   };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isButtonDisabled) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => {
+          if (prevTimer <= 1) {
+            clearInterval(interval);
+            setIsButtonDisabled(false);
+            return 30;
+          }
+          return prevTimer - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isButtonDisabled]);
+
   return (
     <Flex
       vertical
@@ -49,8 +67,9 @@ export default function Verify() {
         onClick={() => {
           resendEmail(email ?? user?.email);
         }}
+        disabled={isButtonDisabled}
       >
-        Resend verification email
+        Resend verification email {isButtonDisabled ? `(${timer})` : ""}
       </Button>
     </Flex>
   );
