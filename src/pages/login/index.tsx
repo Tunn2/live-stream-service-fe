@@ -26,6 +26,7 @@ export default function Login() {
     let response = null;
     localStorage.setItem("skipValidation", "skip");
     try {
+      localStorage.setItem("skipValidation", "skip");
       response = await api.post("auth/login", values);
       localStorage.removeItem("skipValidation");
       const token = response.data.accessToken;
@@ -131,7 +132,7 @@ export default function Login() {
             </Button>
             <div style={styles.footer}>
               <Text style={styles.text}>Don't have an account?</Text>{" "}
-              <Link href="/signup">Sign up now</Link>
+              <Link href="/signup">Sign up</Link>
             </div>
           </Form.Item>
         </Form>

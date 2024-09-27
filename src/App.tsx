@@ -8,6 +8,9 @@ import Profile from "./pages/profile";
 import ProtectedRoute from "./ProtectedRoute";
 import Error from "./pages/error";
 import Category from "./pages/category";
+import Verify from "./pages/verify";
+import VerifyFail from "./pages/verify/fail";
+import VerifySuccess from "./pages/verify/success";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -50,6 +53,18 @@ function App() {
     {
       path: "signup",
       element: <Signup />,
+    },
+    {
+      path: "verify",
+      element: <Verify />,
+    },
+    {
+      path: "verify/success",
+      element: <VerifySuccess />,
+    },
+    {
+      path: "verify/fail",
+      element: <VerifyFail />,
     },
     {
       path: "error",
