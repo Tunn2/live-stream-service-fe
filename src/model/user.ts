@@ -8,4 +8,5 @@ export interface User {
   bio: string;
   isActive: true;
   verify: boolean;
+  passwordResetToken: string;
 }

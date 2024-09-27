@@ -12,6 +12,7 @@ import {
   Tag,
   theme,
   Typography,
+  Popconfirm,
 } from "antd";
 import {
   LikeFilled,
@@ -49,7 +50,18 @@ export default function Profile() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [disable, setDisable] = useState(true);
-  const [user, setUser] = useState(null);
+  interface User {
+    _id: string;
+    name: string;
+    bio: string;
+    avatarUrl: string;
+    isActive: boolean;
+    createdAt: string;
+    totalLikes?: number;
+    follower?: number;
+  }
+
+  const [user, setUser] = useState<User | null>(null);
   const [form] = Form.useForm(); // For resetting form
   const fileInputRef = useRef(null); // Ref for the file input
   const dispatch = useDispatch();
@@ -58,6 +70,7 @@ export default function Profile() {
 
   const [isLoadingChangePassword, setIsLoadingChangePassword] = useState(false);
   const [isChangePassword, setIsChangePassword] = useState(false);
+  const [isLoadingResetPassword, setIsLoadingResetPassword] = useState(false);
 
   const handleFileInputChange = (e) => {
     const files = e.target.files;
@@ -144,8 +157,20 @@ export default function Profile() {
       toast.success(response.data.message);
     } catch (error) {
       toast.error(error.response?.data.error);
-    }finally{
+    } finally {
       setIsLoadingChangePassword(false);
+    }
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    try {
+      setIsLoadingResetPassword(true);
+      const response = await api.post(`users/resetPassword`, { userId });
+      toast.success(response.data.message + " Please check your email");
+    } catch (error) {
+      toast.error(error.response?.data.error);
+    } finally {
+      setIsLoadingResetPassword(false);
     }
   };
 
@@ -414,15 +439,20 @@ export default function Profile() {
                         </Button>
                       </Col>
                       <Col span={12} style={{ padding: "0px 20px" }}>
-                        <Button
-                          block
-                          onClick={handleCancel}
-                          style={{
-                            margin: "10px 0px",
-                          }}
+                        <Popconfirm
+                          title="Are you sure to reset your password ?"
+                          description="This action can not be undone"
+                          onConfirm={() => handleResetPassword(user?._id)}
                         >
-                          Forgot Password
-                        </Button>
+                          <Button
+                            block
+                            style={{
+                              margin: "10px 0px",
+                            }}
+                          >
+                            Forgot Password
+                          </Button>
+                        </Popconfirm>
                       </Col>
                     </Row>
                   </Form.Item>
