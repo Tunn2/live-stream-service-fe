@@ -36,12 +36,14 @@
 
 .title-center3 {
   text-align: center;
+  padding: 80px 0px !important;
+  text-align: center;
   padding: 10px 0;
   border-bottom: 1px solid #6a5acd;
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: 650 !important;
+  font-size: 22px !important;
   width: 300px;
-  color: #ffd700 !important; /* Bright color to stand out */
+  color: rgb(210, 180, 255) !important; /* Bright color to stand out */
 }
 
 .list-item-streamers {
