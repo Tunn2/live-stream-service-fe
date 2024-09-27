@@ -5,11 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { logout } from "../../redux/features/userSlice";
+import Title from "antd/es/typography/Title";
+import { User } from "../../model/user";
 
 export default function Verify() {
   const locationState = useLocation()?.state || {};
   const { email } = locationState;
-  const user = useSelector((store) => store.user);
+  const user = useSelector((store: { user: User }) => store.user);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [timer, setTimer] = useState(30);
   const navigate = useNavigate();
@@ -39,9 +41,9 @@ export default function Verify() {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate("/");
     }
-  }, [])
+  }, []);
 
   const handleGoBack = () => {
     localStorage.removeItem("token");
@@ -70,7 +72,7 @@ export default function Verify() {
       </Button>
 
       <Image src={logo} width={350} preview={false} />
-      <h1>Verify your email</h1>
+      <Title level={2}>Verify your email</Title>
       <p>
         We've sent a verification link to your email address. The link in the
         email will expire in 24 hours.

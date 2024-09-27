@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { logout } from "../../../redux/features/userSlice";
+import Title from "antd/es/typography/Title";
 export default function VerifySuccess() {
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
@@ -23,7 +24,7 @@ export default function VerifySuccess() {
       style={{ height: "100vh", width: "40vw", margin: "-150px auto" }}
     >
       <Image src={logo} width={350} preview={false} />
-      <h1>Verify your email successfully</h1>
+      <Title level={2}>Verify your email successfully</Title>
       <p>
         Thank you, your email has been <strong>verified</strong>. Your account
         is now active.
