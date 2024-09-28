@@ -1,23 +1,18 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Avatar,
   Button,
-  Flex,
   Col,
   Form,
   Grid,
   Image,
   Input,
   Row,
-  Tag,
   theme,
-  Typography,
   Popconfirm,
 } from "antd";
 import {
   LikeFilled,
-  LoadingOutlined,
-  PlusOutlined,
   UsergroupAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -27,12 +22,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/features/userSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../configs/axios";
-import { blue } from "@ant-design/colors";
-import { EyeOutlined, LikeOutlined } from "@ant-design/icons";
-import axios from "axios";
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
-const { Title } = Typography;
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -43,6 +34,7 @@ const getBase64 = (file) =>
   });
 
 export default function Profile() {
+  const navigate = useNavigate();
   const { token } = useToken();
   const screens = useBreakpoint();
   const [fileList, setFileList] = useState([]);
@@ -138,6 +130,7 @@ export default function Profile() {
       toast.error(error.response?.data.error);
     } finally {
       setLoading(false);
+      navigate(0);
     }
   };
 
@@ -253,9 +246,13 @@ export default function Profile() {
               src={fileList.length > 0 ? fileList[0].url : user?.avatarUrl}
               className="Other-image-inside"
               onClick={() => {
-                user1._id === userId && disable === false
-                  ? fileInputRef.current.click()
-                  : toaster();
+                if (user1._id === userId && disable === false) {
+                  if (fileInputRef.current) {
+                    fileInputRef.current.click();
+                  }
+                } else {
+                  toaster();
+                }
               }} // Trigger file input
             />
           </div>
@@ -392,7 +389,7 @@ export default function Profile() {
                       <Col span={8} style={{ padding: "0px 20px" }}>
                         <Button
                           block
-                          onClick={() => setDisable(false)}
+                          onClick={() => setDisable((prev) => !prev)}
                           style={{ margin: "10px 0px" }}
                         >
                           Edit
