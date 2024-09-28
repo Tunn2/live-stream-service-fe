@@ -4,8 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { logout } from "../../../redux/features/userSlice";
 import Title from "antd/es/typography/Title";
+import { User } from "../../../model/user";
 export default function VerifyFail() {
-  const user = useSelector((store) => store.user);
+  const user = useSelector((store: { user: User }) => store.user);
   const dispatch = useDispatch();
   useEffect(() => {
     if (user !== null) {

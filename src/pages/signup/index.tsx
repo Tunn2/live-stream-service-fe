@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { User } from "../../model/user";
 
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
@@ -42,7 +43,7 @@ export default function Signup() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const user = useSelector((store) => store.user);
+  const user = useSelector((store: { user: User }) => store.user);
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -185,7 +186,7 @@ export default function Signup() {
                 required: true,
                 message: "Please input your password",
               },
-              ({ getFieldValue }) => ({
+              () => ({
                 validator(_, value) {
                   if (
                     value.length >= 8 &&

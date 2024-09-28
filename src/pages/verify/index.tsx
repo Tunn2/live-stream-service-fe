@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { logout } from "../../redux/features/userSlice";
 import Title from "antd/es/typography/Title";
 import { User } from "../../model/user";
+import { toast } from "react-toastify";
+import { RollbackOutlined } from "@ant-design/icons";
 
 export default function Verify() {
   const locationState = useLocation()?.state || {};
@@ -17,8 +19,16 @@ export default function Verify() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const resendEmail = (email) => {
-    axios.get(`http://localhost:4000/api/auth/verify/resend?email=${email}`);
+  const resendEmail = (email: string) => {
+    axios
+      .get(`http://localhost:4000/api/auth/verify/resend?email=${email}`)
+      .then((res) => {
+        toast.success(res.data.message);
+      })
+      .catch((err) => {
+        console.log(err.response.data.error);
+        toast.error(err.response.data.error);
+      });
     setIsButtonDisabled(true);
   };
 
@@ -68,6 +78,7 @@ export default function Verify() {
         }}
         onClick={handleGoBack}
       >
+        <RollbackOutlined/>
         Go back to login
       </Button>
 
