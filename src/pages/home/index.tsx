@@ -8,6 +8,7 @@ import {
   List,
   Button,
   Pagination,
+  Avatar,
 } from "antd";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ import {
   EyeOutlined,
   FireOutlined,
   LikeOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import stream from "../../img/stream.jpg";
 const { Content, Sider } = Layout;
@@ -47,12 +49,14 @@ const HomePage = () => {
       return 0;
     } else return arr.length;
   };
+
   useEffect(() => {
     const fetchStreams = async () => {
       try {
         const response = await api.get(
-          `http://localhost:4000/api/streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
+          `streams?page=${currentPage}&size=${pageSize}&isStreaming=true`
         );
+
         setStreams(response.data.data.streams);
         setTotalPages(response.data.data.totalPages);
       } catch (error) {
@@ -66,32 +70,44 @@ const HomePage = () => {
   useEffect(() => {
     const fetchTopLikedStream = async () => {
       try {
-        const response = await api.get(
-          "http://localhost:4000/api/streams/top1?type=like"
-        );
-        const topStream = Array.isArray(response.data)
-          ? response.data[0] // If it's an array, use the first object
-          : response.data; // Otherwise, use the object directly
-
-        setTopLikedStream(topStream);
-        const cateRes = await api.get(
-          "http://localhost:4000/api/streams/categories"
-        );
+        const cateRes = await api.get("/streams/categories");
         setCategories(cateRes.data.data);
-        const topStreamers = await api.get("users/topUser?top=5");
-        setTopStreamers(topStreamers.data.data);
       } catch (error) {
         console.error("Error fetching top-liked stream:", error);
       }
     };
 
+    const fetchTopStreamers = async () => {
+      try {
+        const topStreamers = await api.get("users/topUser?top=5");
+        setTopStreamers(topStreamers.data.data);
+      } catch (error) {
+        console.error("Error fetching top streamers", error);
+      }
+    };
+
+    const fetchTopStream = async () => {
+      try {
+        const response = await api.get("/streams/top1?type=like");
+        const topStream = Array.isArray(response.data)
+          ? response.data[0] // If it's an array, use the first object
+          : response.data; // Otherwise, use the object directly
+
+        setTopLikedStream(topStream);
+      } catch (error) {
+        console.error("Error fetching top streamers", error);
+      }
+    };
+
+    fetchTopStreamers();
+    fetchTopStream();
     fetchTopLikedStream();
   }, []);
 
   return (
     <Layout className="layout">
       {/* Categories Section */}
-      <Sider width={350} className="sider">
+      <Sider width={300} className="sider">
         <div className="top-section">
           <Title level={5} className="title-center3">
             TOP STREAMERS <CrownOutlined />
@@ -105,17 +121,16 @@ const HomePage = () => {
                 onClick={() => navigate(`/profile/${streamers._id}`)}
               >
                 <Row align="middle">
-                  <Col span={6}>
-                    <img
+                  <Col span={6} className="avatar-container">
+                    <Avatar
                       src={streamers.avatarUrl}
+                      icon={<UserOutlined />}
                       alt={`${streamers.name} avatar`}
                       className="avatar"
                     />
                   </Col>
                   <Col span={18} className="info-container">
-                    <h5 className="streamers-name">
-                      {streamers.name} <CrownOutlined />
-                    </h5>
+                    <h5 className="streamers-name">{streamers.name}</h5>
                     <h5 className="total-like">
                       Total likes: <span>{streamers.totalLikes}</span>{" "}
                       <LikeOutlined />
@@ -142,8 +157,12 @@ const HomePage = () => {
                 onClick={() => navigate(`/category/${category.name}`)}
               >
                 <img
-                  src={category.image}
-                  alt="image"
+                  src={
+                    category.image ||
+                    "https://artsmidnorthcoast.com/wp-content/uploads/2014/05/no-image-available-icon-6-300x188.png"
+                  }
+                  alt="category image"
+                  className="category-image"
                   style={{ width: "100%", height: "auto" }}
                 />
                 <Text className="list-text">{category.name}</Text>
@@ -154,81 +173,75 @@ const HomePage = () => {
       </Sider>
 
       {/* Main Content Section */}
-      <Layout className="sider" style={{ overflowX: "hidden" }}>
-        <h2 className="title-center">
-          <span>
+      <Layout className="main" style={{ overflowX: "hidden" }}>
+        <Content className="top-stream">
+          <h2>
             <FireOutlined /> TOP STREAM
-          </span>
-        </h2>
-        <Content style={{}}>
+          </h2>
           {topLikedStream ? (
             <div className="top-liked-container">
-              <img
-                src={topLikedStream.thumbnailUrl}
-                alt={topLikedStream.title}
-                className="top-liked-image"
-              />
-              <div className="top-liked-banner">Trendy</div>
-              <div
-                className="top-liked-banner2"
-                onClick={() => {
-                  navigate(`/category/${topLikedStream.categories[0]}`);
-                }}
-              >
-                {topLikedStream.categories[0]}
+              <div className="top-liked-image">
+                <img
+                  src={
+                    topLikedStream.thumbnailUrl ||
+                    "https://artsmidnorthcoast.com/wp-content/uploads/2014/05/no-image-available-icon-6-300x188.png"
+                  }
+                  alt={topLikedStream.title}
+                />
               </div>
-              <div className="top-liked-bottom">
-                <div className="top-liked-details">
-                  <img
-                    src={topLikedStream.userId.avatarUrl}
-                    alt={`${topLikedStream.userId.name}'s avatar`}
-                    className="top-liked-avatar"
-                    onClick={() => {
-                      navigate(`profile/${topLikedStream.userId._id}`);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  />
-                  <div style={{ flex: 1, textAlign: "left" }}>
-                    <Row className="space-between">
-                      <p className="top-liked-title">{topLikedStream.title}</p>
-                      <p className="top-liked-username">
+              <div className="top-liked-details">
+                <Row style={{ display: "flex", gap: "1em" }}>
+                  <div>
+                    <Avatar
+                      src={topLikedStream.userId.avatarUrl}
+                      icon={<UserOutlined />}
+                      alt={`${topLikedStream.userId.name}'s avatar`}
+                      className="top-liked-avatar"
+                      onClick={() => {
+                        navigate(`profile/${topLikedStream.userId._id}`);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </div>
+                  <div>
+                    <p className="top-liked-username">
+                      <span
+                        onClick={() => {
+                          navigate(`profile/${topLikedStream.userId._id}`);
+                        }}
+                        style={{ fontWeight: 800, cursor: "pointer" }}
+                      >
+                        {topLikedStream.userId.name}
+                      </span>
+                    </p>
+                    <div style={{ display: "flex", gap: "1em" }}>
+                      <p className="like-icon">
                         {ArraySize(topLikedStream.likeBy)} <LikeOutlined />
                       </p>
-                    </Row>
-                    <Row className="space-between">
-                      <p className="top-liked-username">
-                        Stream by:{" "}
-                        <span
-                          onClick={() => {
-                            navigate(`profile/${topLikedStream.userId._id}`);
-                          }}
-                          style={{ fontWeight: 800, cursor: "pointer" }}
-                        >
-                          {topLikedStream.userId.name}
-                        </span>
-                      </p>
-                      <p className="top-liked-username">
+                      <p className="view-icon">
                         {topLikedStream.currentViewCount} <EyeOutlined />
-                      </p>{" "}
-                    </Row>
-                    <button
-                      type="default"
-                      className="top-liked-button"
-                      onClick={() => {
-                        navigate(`/room/${topLikedStream._id}`);
-                      }}
-                    >
-                      Go to Stream
-                    </button>
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </Row>
+                <button
+                  type="default"
+                  className="top-liked-button"
+                  onClick={() => {
+                    navigate(`/room/${topLikedStream._id}`);
+                  }}
+                >
+                  Go to Stream
+                </button>
               </div>
             </div>
           ) : (
             <div className="top-liked-container">
-              <img src={stream} alt="Featured Stream" className="fallBack" />
-              <div className="fallBack1">
-                <h2 className="fallbackH2">
+              <div className="fallback-image">
+                <img src={stream} alt="Featured Stream" />
+              </div>
+              <div className="fallback-info">
+                <h2>
                   No stream available yet, the most liked stream will be
                   displayed here
                 </h2>
@@ -236,24 +249,25 @@ const HomePage = () => {
             </div>
           )}
         </Content>
-        <hr className="splitter" />
+
         {/* Featured Streams Section */}
-        <Content>
-          <h2 className="title-center">
-            <span>FEATURED STREAMS</span>
-          </h2>
+        <Content className="stream-list">
+          <h2>FEATURED STREAMS</h2>
           <Row gutter={[16, 16]}>
             {streams.length > 0 ? (
               streams.map((stream, index) => (
                 <Col xs={24} sm={12} md={8} key={index}>
                   <Card
+                    className="stream-card"
                     hoverable
                     cover={
-                      <div style={{ position: "relative" }}>
+                      <div
+                        style={{ position: "relative" }}
+                        className="card-cover-image"
+                      >
                         <img
                           alt={stream.title}
                           src={stream.thumbnailUrl}
-                          className="card-cover-image"
                           onClick={() => {
                             navigate(`/room/${stream._id}`);
                           }}
@@ -272,17 +286,18 @@ const HomePage = () => {
                             <div
                               className="stream-info-text"
                               onClick={() => {
-                                navigate(`/profile/${stream.userId._id}`);
+                                navigate(`/profile/${stream.userId?._id}`);
                               }}
                             >
-                              <img
+                              <Avatar
                                 alt="avatar"
-                                src={stream.userId.avatarUrl}
+                                icon={<UserOutlined />}
+                                src={stream.userId?.avatarUrl}
                                 className="avatar"
                               />
                             </div>
                             <div>
-                              <span>
+                              <span className="stream-title">
                                 <strong
                                   onClick={() => {
                                     navigate(`/room/${stream._id}`);
@@ -292,29 +307,16 @@ const HomePage = () => {
                                 </strong>{" "}
                                 <br />
                               </span>
-                              <span
+                              <span class="stream-streamer-name"
                                 onClick={() => {
-                                  navigate(`/profile/${stream.userId._id}`);
+                                  navigate(`/profile/${stream.userId?._id}`);
                                 }}
                               >
                                 {" "}
-                                {stream.userId.name}
+                                {stream.userId?.name}
                               </span>
                             </div>
                           </div>
-                          <br />
-                          <ul>
-                            {stream.categories.map((category, index) => (
-                              <li
-                                key={index}
-                                onClick={() =>
-                                  navigate(`/category/${category}`)
-                                }
-                              >
-                                {category}
-                              </li>
-                            ))}
-                          </ul>
                         </>
                       }
                     />

@@ -49,11 +49,11 @@ export default function Verify() {
     return () => clearInterval(interval);
   }, [isButtonDisabled]);
 
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate("/");
+  //   }
+  // }, []);
 
   const handleGoBack = () => {
     localStorage.removeItem("token");
