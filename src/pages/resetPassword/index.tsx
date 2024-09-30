@@ -2,20 +2,20 @@ import { Button, Flex, Form, Image, Input } from "antd";
 import logo from "../../img/logo-color.png";
 import Title from "antd/es/typography/Title";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../../configs/axios";
 import { toast } from "react-toastify";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { logout } from "../../redux/features/userSlice";
+import axios from "axios";
 export default function ResetPassword() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token } = useParams();
   const [isLoadingResetPassword, setIsLoadingResetPassword] = useState(false);
-
   const handleSubmitResetPassword = async (
     token: string,
-    values: { newPassword: string; confirmPassword: string }
+    newPassword: string
   ) => {
     try {
       setIsLoadingResetPassword(true);
@@ -23,7 +23,10 @@ export default function ResetPassword() {
         toast.error("Token not found");
         return;
       }
-      const response = await api.post(`/users/resetPassword/${token}`, values);
+      const response = await axios.post(
+        `http://localhost:4000/api/users/resetPassword/${token}`,
+        { newPassword}
+      );
       toast.success(response.data.message + " Redirecting to login page...");
       setTimeout(() => {
         localStorage.removeItem("token");
@@ -55,7 +58,7 @@ export default function ResetPassword() {
         style={{ width: "80%" }}
         onFinish={(values) => {
           if (token) {
-            handleSubmitResetPassword(token, values);
+            handleSubmitResetPassword(token, values.newPassword);
           } else {
             toast.error("Token not found");
           }

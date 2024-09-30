@@ -18,17 +18,21 @@ import FormItem from "antd/es/form/FormItem";
 import {
   LoadingOutlined,
   PlusOutlined,
+  SearchOutlined,
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import logoColor from "../../img/logo-color.png";
 import logoWhite from "../../img/logo-white.png";
+import SearchStreamer from "../Search/streamers";
+import SearchStream from "../Search/streams";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
 import api from "../../configs/axios";
+import Search from "antd/es/input/Search";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -46,6 +50,7 @@ function Header() {
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [inputValue, setInputValue] = useState(""); // New state for input
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -121,10 +126,16 @@ function Header() {
     const stream = response?.data.data;
     navigate(`room/${stream._id}`);
   };
+
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  // Handle input change and update state
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
   };
 
   return (
@@ -146,6 +157,46 @@ function Header() {
           </Flex>
         </button>
       </div>
+      <div className="header__center">
+        <Input
+          placeholder="Search input"
+          value={inputValue}
+          onChange={handleInputChange} // Listen for input change
+        />
+        <button
+          className="Search-button"
+          onClick={() => {
+            navigate(`/search/${inputValue}`);
+            setInputValue("");
+          }}
+        >
+          <SearchOutlined />
+        </button>
+        <button
+          className="advance-search-button"
+          onClick={() => {
+            navigate("/advance-search");
+          }}
+        >
+          Advance search
+        </button>
+
+        {/* Overlay, rendered when inputValue is not empty */}
+        {inputValue.trim() !== "" && (
+          <div className="overlay">
+            <h2 className="preview-header">Streams</h2>
+            <SearchStream
+              searchQuery={inputValue}
+              setSearchQuery={setInputValue}
+            />
+            <h2 className="preview-header">Streamers</h2>
+            <SearchStreamer
+              searchQuery={inputValue}
+              setSearchQuery={setInputValue}
+            />
+          </div>
+        )}
+      </div>
       <div className="header__right">
         <Avatar
           size={"large"}
@@ -156,10 +207,15 @@ function Header() {
           }}
           style={{ cursor: "pointer" }}
         />
-        <button style={{color: "white", backgroundColor: "red"}}onClick={handleLogout}>Log out</button>
+        <button
+          style={{ color: "white", backgroundColor: "red" }}
+          onClick={handleLogout}
+        >
+          Log out
+        </button>
       </div>
 
-      <Modal 
+      <Modal
         open={isOpenLive}
         title="Create a live"
         onCancel={() => setIsOpenLive(false)}
