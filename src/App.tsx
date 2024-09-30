@@ -12,6 +12,7 @@ import Verify from "./pages/verify";
 import VerifyFail from "./pages/verify/fail";
 import VerifySuccess from "./pages/verify/success";
 import ResetPassword from "./pages/resetPassword";
+import ForgetPassword from "./pages/forget-password";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -68,8 +69,12 @@ function App() {
       element: <VerifyFail />,
     },
     {
-      path:"reset-password/:token",
-      element:<ResetPassword/>
+      path: "reset-password/:token",
+      element: <ResetPassword />,
+    },
+    {
+      path: "forget-password",
+      element: <ForgetPassword />,
     },
     {
       path: "error",

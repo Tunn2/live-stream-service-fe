@@ -19,7 +19,7 @@ import {
 import "./profile.css";
 import { Bounce, toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../../redux/features/userSlice";
+import { login, logout } from "../../redux/features/userSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../configs/axios";
 const { useToken } = theme;
@@ -45,6 +45,7 @@ export default function Profile() {
   interface User {
     _id: string;
     name: string;
+    email: string;
     bio: string;
     avatarUrl: string;
     isActive: boolean;
@@ -58,7 +59,7 @@ export default function Profile() {
   const fileInputRef = useRef(null); // Ref for the file input
   const dispatch = useDispatch();
   const { userId } = useParams();
-  const user1 = useSelector((store) => store.user);
+  const user1 = useSelector((store: { user: User }) => store.user);
 
   const [isLoadingChangePassword, setIsLoadingChangePassword] = useState(false);
   const [isChangePassword, setIsChangePassword] = useState(false);
@@ -147,7 +148,12 @@ export default function Profile() {
     try {
       setIsLoadingChangePassword(true);
       const response = await api.put(`users/${userId}/changePassword`, values);
-      toast.success(response.data.message);
+      toast.success(response.data.message + " Please login again!");
+      setTimeout(() => {
+        dispatch(logout());
+        localStorage.removeItem("token");
+        navigate("/login");
+      }, 3000);
     } catch (error) {
       toast.error(error.response?.data.error);
     } finally {
@@ -155,10 +161,10 @@ export default function Profile() {
     }
   };
 
-  const handleResetPassword = async (userId: string) => {
+  const handleResetPassword = async (email: string) => {
     try {
       setIsLoadingResetPassword(true);
-      const response = await api.post(`users/resetPassword`, { userId });
+      const response = await api.post(`users/resetPassword`, { email });
       toast.success(response.data.message + " Please check your email");
     } catch (error) {
       toast.error(error.response?.data.error);
@@ -439,7 +445,7 @@ export default function Profile() {
                         <Popconfirm
                           title="Are you sure to reset your password ?"
                           description="This action can not be undone"
-                          onConfirm={() => handleResetPassword(user?._id)}
+                          onConfirm={() => handleResetPassword(user1?.email)}
                         >
                           <Button
                             block
