@@ -69,6 +69,7 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  color: white !important;
 }
 
 .comments-list {
@@ -137,4 +138,8 @@
 
 .stream-details {
   flex-basis: 86%;
+}
+
+.streamer-name * {
+  color: white !important;
 }

@@ -257,6 +257,7 @@
   margin-top: 10px;
   display: flex;
   align-items: center;
+  justify-content: left;
   width: 100%;
   cursor: pointer;
 }
@@ -316,4 +317,9 @@ body::-webkit-scrollbar-horizontal {
 .left{
  text-align: left;
 
+}
+
+.stream-title *,
+.stream-streamer-name {
+  color: white !important;
 }
