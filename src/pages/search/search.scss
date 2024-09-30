@@ -1,0 +1,31 @@
+
+  
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .user{
+    width: 20%;
+  }
+  .list-item-streamer{
+    display: inline-block;
+    width: 19%;
+    margin: 50px 0.5%
+  }
+  .streamer-card{
+    width: 100%;
+    background-color: #fff;
+    cursor: pointer;
+  }
+  .streamer-card:hover{
+    background-color: #c1c1c1;
+    transition: 0.3s ease-in-out;
+    box-shadow: 0px 2px 2px rgb(192, 192, 192);
+  }
+  .streamer-name{
+    color: red;
+    font-size: 22px;
+    font-weight: 600;
+  }
