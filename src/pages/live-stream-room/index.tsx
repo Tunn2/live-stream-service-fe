@@ -42,6 +42,38 @@ const LiveStream = () => {
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const navigate = useNavigate();
+  const [currentDuration, setCurrentDuration] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowingLoading, setIsFollowingLoading] = useState(false);
+
+  const handleFollowUser = async () => {
+    if (!stream || !stream.userId) {
+      toast.error("Streamer information is unavailable.");
+      return;
+    }
+
+    const newIsFollowing = !isFollowing;
+    setIsFollowing(newIsFollowing);
+    setIsFollowingLoading(true);
+
+    try {
+      if (newIsFollowing) {
+        await api.put(`/users/follow/${user._id}/${stream.userId._id}`);
+        toast.success("Followed successfully");
+      } else {
+        await api.put(`/users/unfollow/${user._id}/${stream.userId._id}`);
+        toast.success("Unfollowed successfully");
+      }
+    } catch (error) {
+      console.error(error);
+      // Revert the state if the API call fails
+      setIsFollowing(!newIsFollowing);
+      toast.error("Failed to update follow status.");
+    } finally {
+      setIsFollowingLoading(false); // End loading
+    }
+  };
+
   useEffect(() => {
     // Tham gia vào room theo roomId
     socket.emit("join_room", roomId);
@@ -74,6 +106,7 @@ const LiveStream = () => {
       setStream(response.data.data);
       setLikeCount(response.data.data.likeBy.length);
       setLike(response.data.data.likeBy.includes(user?._id));
+      setIsFollowing(response.data.data.userId.followBy.includes(user?._id))
     } catch (error) {
       console.error("Failed to fetch stream:", error);
       toast.error("Could not load the stream.");
@@ -112,7 +145,7 @@ const LiveStream = () => {
   const handleStopStream = async () => {
     setIsOpenStop(true);
     setLoading(true);
-    if (user?._id === stream?.userId) {
+    if (user?._id === stream?.userId?._id) {
       try {
         const response = await api.post(`streams/end/${roomId}`);
         setLoading(false);
@@ -148,7 +181,7 @@ const LiveStream = () => {
   };
 
   const saveStream = async () => {
-    if (user?._id !== stream?.userId) {
+    if (user?._id !== stream?.userId?._id) {
       return;
     }
 
@@ -211,12 +244,44 @@ const LiveStream = () => {
     handleSkipToEnd();
   };
 
+  const handleTimeUpdate = () => {
+    const video = liveVideoRef.current;
+    if (video) {
+      setCurrentDuration(video.currentTime);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };  
+
+  useEffect(() => {
+    const video = liveVideoRef.current;
+  
+    const updateCurrentDuration = () => {
+      setCurrentDuration(video.currentTime);
+    };
+  
+    if (video) {
+      video.addEventListener("timeupdate", updateCurrentDuration);
+    }
+  
+    return () => {
+      if (video) {
+        video.removeEventListener("timeupdate", updateCurrentDuration);
+      }
+    };
+  }, [liveVideoRef]);
+
   return (
     <div className="live-stream-container">
-      <Row gutter={[24, 24]}>
+      <Row gutter={[24, 24]} style={{ height: "100%" }}>
         {/* Camera Stream Section */}
-        <Col xs={24} sm={24} md={16}>
-          <Card title="Live Stream" bordered={false} className="stream-card">
+        <Col xs={24} sm={24} md={16} className="live-stream-wrapper">
+          <Card bordered={false} className="live-stream-card">
             <div style={{ position: "relative" }}>
               {/* Live Badge */}
               <div className="live-badge">LIVE</div>
@@ -230,6 +295,7 @@ const LiveStream = () => {
                   muted
                   className="live-video"
                   onLoadedMetadata={handleLoadedMetadata}
+                  onTimeUpdate={handleTimeUpdate}
                 />
               )}
               {/* Viewers Count */}
@@ -237,8 +303,50 @@ const LiveStream = () => {
                 <EyeOutlined /> {viewersCount} watching
               </div>
             </div>
+            
+            <div className="stream-info">
+              <div className="streamer-avatar">
+                <Avatar
+                  src={stream?.userId?.avatarUrl}
+                  icon={<UserOutlined />}
+                  alt={`${stream?.userId?.name}'s avatar`}
+                  onClick={() => {
+                    navigate(`/profile/${stream?.userId?._id}`);
+                  }}
+                  style={{ cursor: "pointer" }}
+                />
+              </div>
+              <div className="stream-details">
+                <p className="streamer-name">
+                  <span
+                    onClick={() => {
+                      navigate(`/profile/${stream?.userId?._id}`);
+                    }}
+                    style={{ fontWeight: 800, cursor: "pointer" }}
+                  >
+                    {stream?.userId?.name}
+                  </span>
+                </p>
+                <p className="stream-title">{stream?.title || "Title"}</p>
+              </div>
+              <div className="stream-button">
+                {user?._id !== stream?.userId?._id &&(
+                  <Button
+                    type="primary"
+                    onClick={handleFollowUser}
+                    loading={isFollowingLoading}
+                  >
+                    {isFollowing ? "Followed" : "Follow"}
+                  </Button>
+                )}
+                <div style={{ textAlign: "center" }}>
+                  <p>{formatTime(currentDuration)}</p>
+                </div>
+              </div>
+            </div>
+
             <div className="stop-stream-button">
-              {user?._id === stream?.userId && (
+              {user?._id === stream?.userId?._id && (
                 <>
                   <Button
                     type="primary"
@@ -273,28 +381,37 @@ const LiveStream = () => {
           </Card>
         </Col>
 
-        <Col xs={24} sm={24} md={8}>
-          <Card title="Comments" bordered={false} className="comments-card">
-            <List
-              dataSource={messages}
-              renderItem={(item) => (
-                <List.Item key={item.id} ref={messageEndRef}>
-                  <List.Item.Meta
-                    avatar={<Avatar icon={<UserOutlined />} src={item.avatar} />}
-                    title={<Text strong>{item.sender}:</Text>}
-                    description={item.text}
-                  />
-                </List.Item>
-              )}
-              className="comments-list"
-            />
-            <Form onFinish={sendMessage} layout="inline" className="message-form">
+        <Col xs={24} sm={24} md={8} className="comments-wrapper">
+          <Card bordered={false} className="comments-card">
+            <div className="comments-list">
+              <List
+                dataSource={messages}
+                renderItem={(item) => (
+                  <List.Item key={item.id} ref={messageEndRef}>
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar icon={<UserOutlined />} src={item.avatar} />
+                      }
+                      title={<Text strong>{item.sender}:</Text>}
+                      description={item.text}
+                      style={{ color: "white" }}
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+            <Form
+              onFinish={sendMessage}
+              layout="inline"
+              className="message-form"
+            >
               <Form.Item style={{ flexGrow: 1 }}>
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type your message here"
                   onPressEnter={sendMessage}
+                  className="message-input"
                 />
               </Form.Item>
               <Form.Item>
