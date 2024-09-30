@@ -45,7 +45,7 @@ const HomePage = () => {
   const ArraySize = (arr) => {
     if (!arr) {
       return 0;
-    } else return arr.length;
+    } else return arr?.length;
   };
   useEffect(() => {
     const fetchStreams = async () => {
@@ -243,7 +243,7 @@ const HomePage = () => {
             <span>FEATURED STREAMS</span>
           </h2>
           <Row gutter={[16, 16]}>
-            {streams.length > 0 ? (
+            {streams?.length > 0 ? (
               streams.map((stream, index) => (
                 <Col xs={24} sm={12} md={8} key={index}>
                   <Card

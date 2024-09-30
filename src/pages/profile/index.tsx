@@ -15,8 +15,6 @@ import {
 } from "antd";
 import {
   LikeFilled,
-  LoadingOutlined,
-  PlusOutlined,
   UsergroupAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -28,6 +26,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../../configs/axios";
 import { blue } from "@ant-design/colors";
 import { EyeOutlined, LikeOutlined } from "@ant-design/icons";
+import FollowModal from "../../components/follower-modal";
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Title } = Typography;
@@ -54,6 +53,8 @@ export default function Profile() {
   const dispatch = useDispatch();
   const { userId } = useParams();
   const user1 = useSelector((store) => store.user);
+  const [openFollowerModal, setOpenFollowerModal] = useState(false);
+  const [openFollowingModal, setOpenFollowingModal] = useState(false);
 
   const handleFileInputChange = (e) => {
     const files = e.target.files;
@@ -128,6 +129,10 @@ export default function Profile() {
     form.resetFields(); // Reset form
     setFileList([]); // Clear file list
     setDisable(true); // Disable editing
+  };
+
+  const handleCloseFollowerModal = () => {
+    setOpenFollowerModal(false);
   };
 
   useEffect(() => {
@@ -298,32 +303,41 @@ export default function Profile() {
                   <Col span={12}>
                     <div
                       className="box"
-                      onClick={() => {
-                        toast(
-                          `${
-                            user1._id === userId ? "You have" : "This user has"
-                          } ${user.formDatallower || 0} followers`,
-                          {
-                            position: "top-right",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "light",
-                            transition: Bounce,
-                          }
-                        );
-                      }}
+                      onClick={() => setOpenFollowerModal(true)}
                     >
                       <>
                         <h2 style={{ textAlign: "center" }}>Followers: </h2>{" "}
                         <h2 style={{ fontSize: 30, textAlign: "center" }}>
-                          {user.follower || 0} <UsergroupAddOutlined />
+                          {user.followBy.length || 0} <UsergroupAddOutlined />
                         </h2>
                       </>
                     </div>
+                    <FollowModal
+                      title="Follower"
+                      open={openFollowerModal}
+                      followers={user?.followBy}
+                      onClose={handleCloseFollowerModal}
+                    />
+                  </Col>
+
+                  <Col span={12}>
+                    <div
+                      className="box"
+                      onClick={() => setOpenFollowingModal(true)}
+                    >
+                      <>
+                        <h2 style={{ textAlign: "center" }}>Following: </h2>{" "}
+                        <h2 style={{ fontSize: 30, textAlign: "center" }}>
+                          {user.follow.length || 0} <UsergroupAddOutlined />
+                        </h2>
+                      </>
+                    </div>
+                    <FollowModal
+                      title="Following"
+                      open={openFollowingModal}
+                      followers={user?.follow}
+                      onClose={() => setOpenFollowingModal(false)}
+                    />
                   </Col>
                 </Row>
               </div>
