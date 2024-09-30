@@ -69,7 +69,8 @@ export default function SearchStreamer({ searchQuery, setSearchQuery }) {
         </ul>
       )}
       <div className="left">
-        There are {total - 5} more user match the search result
+        There are {total - 5 > 0 ? total - 5 : 0} more user match the search
+        result
       </div>
     </div>
   );

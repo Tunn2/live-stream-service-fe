@@ -52,7 +52,11 @@ export default function SearchStream({ searchQuery, setSearchQuery }) {
               }}
             >
               <Col span={8}>
-                <img src={stream.thumbnailImg} alt="image" />
+                <img
+                  src={stream.thumbnailUrl}
+                  alt="image"
+                  className="stream-img"
+                />
               </Col>
               <Col span={16}>
                 <li key={stream._id} className="">
