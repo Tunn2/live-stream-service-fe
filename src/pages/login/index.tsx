@@ -131,6 +131,7 @@ export default function Login() {
             <Button block="true" type="primary" htmlType="submit">
               Log in
             </Button>
+            <Link href="/forget-password">Forgot password?</Link>
             <div style={styles.footer}>
               <Text style={styles.text}>Don't have an account?</Text>{" "}
               <Link href="/signup">Sign up</Link>
