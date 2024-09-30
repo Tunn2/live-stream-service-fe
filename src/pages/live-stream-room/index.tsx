@@ -148,6 +148,10 @@ const LiveStream = () => {
   };
 
   const saveStream = async () => {
+    if (user?._id !== stream?.userId) {
+      return;
+    }
+
     try {
       const response = await api.post(`/streams/save/${roomId}`);
       console.log("Stream saved:", response.data);

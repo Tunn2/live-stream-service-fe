@@ -5,18 +5,30 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { logout } from "../../redux/features/userSlice";
+import Title from "antd/es/typography/Title";
+import { User } from "../../model/user";
+import { toast } from "react-toastify";
+import { RollbackOutlined } from "@ant-design/icons";
 
 export default function Verify() {
   const locationState = useLocation()?.state || {};
   const { email } = locationState;
-  const user = useSelector((store) => store.user);
+  const user = useSelector((store: { user: User }) => store.user);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [timer, setTimer] = useState(30);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const resendEmail = (email) => {
-    axios.get(`http://localhost:4000/api/auth/verify/resend?email=${email}`);
+  const resendEmail = (email: string) => {
+    axios
+      .get(`http://localhost:4000/api/auth/verify/resend?email=${email}`)
+      .then((res) => {
+        toast.success(res.data.message);
+      })
+      .catch((err) => {
+        console.log(err.response.data.error);
+        toast.error(err.response.data.error);
+      });
     setIsButtonDisabled(true);
   };
 
@@ -37,11 +49,11 @@ export default function Verify() {
     return () => clearInterval(interval);
   }, [isButtonDisabled]);
 
-  useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate("/");
+  //   }
+  // }, []);
 
   const handleGoBack = () => {
     localStorage.removeItem("token");
@@ -66,11 +78,12 @@ export default function Verify() {
         }}
         onClick={handleGoBack}
       >
+        <RollbackOutlined/>
         Go back to login
       </Button>
 
       <Image src={logo} width={350} preview={false} />
-      <h1>Verify your email</h1>
+      <Title level={2}>Verify your email</Title>
       <p>
         We've sent a verification link to your email address. The link in the
         email will expire in 24 hours.
