@@ -11,6 +11,8 @@ import Category from "./pages/category";
 import Verify from "./pages/verify";
 import VerifyFail from "./pages/verify/fail";
 import VerifySuccess from "./pages/verify/success";
+import Search from "./pages/search";
+import AdvanceSearch from "./pages/advance-search";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -43,6 +45,18 @@ function App() {
         {
           path: "room/:id",
           element: <LiveStream />,
+        },
+        {
+          path: "/search/:searchQuery",
+          element: <Search />,
+        },
+        {
+          path: "/search/",
+          element: <Search />,
+        },
+        {
+          path: "/advance-search/",
+          element: <AdvanceSearch />,
         },
       ],
     },
