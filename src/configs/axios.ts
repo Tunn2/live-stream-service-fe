@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
-const baseUrl = "http://localhost:4000/api/";
+const baseUrl = `${import.meta.env.VITE_SERVER_URL}/api/`;
 const config = {
   baseUrl,
   timeout: 3000000,

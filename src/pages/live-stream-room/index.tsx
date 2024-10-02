@@ -26,7 +26,7 @@ import api from "../../configs/axios";
 import "./index.scss";
 
 const { Text } = Typography;
-const socket = io("http://localhost:4000");
+const socket = io(import.meta.env.VITE_SERVER_URL);
 
 const LiveStream = () => {
   const user = useSelector((store) => store.user);
@@ -106,7 +106,7 @@ const LiveStream = () => {
       setStream(response.data.data);
       setLikeCount(response.data.data.likeBy.length);
       setLike(response.data.data.likeBy.includes(user?._id));
-      setIsFollowing(response.data.data.userId.followBy.includes(user?._id))
+      setIsFollowing(response.data.data.userId.followBy.includes(user?._id));
     } catch (error) {
       console.error("Failed to fetch stream:", error);
       toast.error("Could not load the stream.");
@@ -255,20 +255,22 @@ const LiveStream = () => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };  
+    return `${hrs.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const video = liveVideoRef.current;
-  
+
     const updateCurrentDuration = () => {
       setCurrentDuration(video.currentTime);
     };
-  
+
     if (video) {
       video.addEventListener("timeupdate", updateCurrentDuration);
     }
-  
+
     return () => {
       if (video) {
         video.removeEventListener("timeupdate", updateCurrentDuration);
@@ -303,7 +305,7 @@ const LiveStream = () => {
                 <EyeOutlined /> {viewersCount} watching
               </div>
             </div>
-            
+
             <div className="stream-info">
               <div className="streamer-avatar">
                 <Avatar
@@ -330,7 +332,7 @@ const LiveStream = () => {
                 <p className="stream-title">{stream?.title || "Title"}</p>
               </div>
               <div className="stream-button">
-                {user?._id !== stream?.userId?._id &&(
+                {user?._id !== stream?.userId?._id && (
                   <Button
                     type="primary"
                     onClick={handleFollowUser}

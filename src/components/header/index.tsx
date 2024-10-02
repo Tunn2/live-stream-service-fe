@@ -104,7 +104,7 @@ function Header() {
     formData.append("userId", user._id);
     try {
       response = await axios.post(
-        "http://localhost:4000/api/streams/",
+        `${import.meta.env.VITE_SERVER_URL}/api/streams/`,
         formData,
         {
           headers: {

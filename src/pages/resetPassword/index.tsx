@@ -24,7 +24,7 @@ export default function ResetPassword() {
         return;
       }
       const response = await axios.post(
-        `http://localhost:4000/api/users/resetPassword/${token}`,
+        `${import.meta.env.VITE_SERVER_URL}/api/users/resetPassword/${token}`,
         { newPassword}
       );
       toast.success(response.data.message + " Redirecting to login page...");

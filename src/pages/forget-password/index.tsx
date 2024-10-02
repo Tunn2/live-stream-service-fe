@@ -13,7 +13,7 @@ export default function ForgetPassword() {
     try {
       setIsLoadingResetPassword(true);
       const response = await axios.post(
-        "http://localhost:4000/api/users/resetPassword",
+        `${import.meta.env.VITE_SERVER_URL}/api/users/resetPassword`,
         { email }
       );
       toast.success(response.data.message + " Please check your email");
@@ -24,7 +24,7 @@ export default function ForgetPassword() {
       setIsButtonDisabled(true);
     }
   };
-  useEffect(()=>{
+  useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isButtonDisabled) {
       interval = setInterval(() => {
@@ -38,7 +38,7 @@ export default function ForgetPassword() {
       }, 1000);
     }
     return () => clearInterval(interval);
-  },[isButtonDisabled]);
+  }, [isButtonDisabled]);
 
   return (
     <Flex
@@ -80,7 +80,7 @@ export default function ForgetPassword() {
               loading={isLoadingResetPassword}
               disabled={isButtonDisabled}
             >
-              Send reset password link {isButtonDisabled? `(${timer})`: ""}
+              Send reset password link {isButtonDisabled ? `(${timer})` : ""}
             </Button>
           </Form.Item>
         </center>

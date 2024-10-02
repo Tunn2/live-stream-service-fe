@@ -18,7 +18,7 @@ function Room() {
         }
   
         // Initialize Socket.io connection
-        socketRef.current = io("http://localhost:4000");
+        socketRef.current = io(import.meta.env.VITE_SERVER_URL);
   
         // Create a MediaRecorder to capture video data
         mediaRecorderRef.current = new MediaRecorder(stream);

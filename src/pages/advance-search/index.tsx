@@ -21,7 +21,7 @@ export default function AdvanceSearch() {
     const fetchCate = async () => {
       try {
         const cateRes = await api.get(
-          "http://localhost:4000/api/streams/categories"
+          `${import.meta.env.VITE_SERVER_URL}/api/streams/categories`
         );
         setCategories(cateRes.data.data);
       } catch (error) {

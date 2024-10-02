@@ -23,7 +23,9 @@ export default function Category() {
     const fetchStreams = async () => {
       try {
         const response = await api.get(
-          `http://localhost:4000/api/streams/filter-by-category?category=${category}&page=${currentPage}&itemsPerPage=${pageSize}`
+          `${
+            import.meta.env.VITE_SERVER_URL
+          }/api/streams/filter-by-category?category=${category}&page=${currentPage}&itemsPerPage=${pageSize}`
         );
         console.log(response.data);
         setStreams(response.data.streams);
@@ -43,7 +45,7 @@ export default function Category() {
     const fetchCategories = async () => {
       try {
         const cateRes = await api.get(
-          "http://localhost:4000/api/streams/categories"
+          `${import.meta.env.VITE_SERVER_URL}/api/streams/categories`
         );
         setCategories(cateRes.data.data);
       } catch (error) {

@@ -21,7 +21,11 @@ export default function Verify() {
 
   const resendEmail = (email: string) => {
     axios
-      .get(`http://localhost:4000/api/auth/verify/resend?email=${email}`)
+      .get(
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/api/auth/verify/resend?email=${email}`
+      )
       .then((res) => {
         toast.success(res.data.message);
       })
@@ -78,7 +82,7 @@ export default function Verify() {
         }}
         onClick={handleGoBack}
       >
-        <RollbackOutlined/>
+        <RollbackOutlined />
         Go back to login
       </Button>
 
