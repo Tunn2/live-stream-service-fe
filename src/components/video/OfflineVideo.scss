@@ -1,0 +1,26 @@
+:root {
+    --muted-foreground: rgb(29, 21, 21);
+}
+
+.offlineVideo {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.offlineVideo * {
+    color: white !important;
+}
+
+.offlineVideo .icon {
+    height: 2.5rem; /* h-10 */
+    width: 2.5rem; /* w-10 */
+    color: var(--muted-foreground);
+}
+
+.offlineVideo .message {
+    color: var(--muted-foreground);
+}

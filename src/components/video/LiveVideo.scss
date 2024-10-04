@@ -1,0 +1,22 @@
+.videoWrapper {
+    position: relative; 
+    width: 100%;
+    height: 100%;
+}
+
+video {
+    width: 100%; 
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.fullscreenControl {
+    position: absolute;
+    width: 100%;
+    bottom: 10px;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+}

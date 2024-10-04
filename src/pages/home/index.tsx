@@ -269,7 +269,7 @@ const HomePage = () => {
                           alt={stream.title}
                           src={stream.thumbnailUrl}
                           onClick={() => {
-                            navigate(`/room/${stream._id}`);
+                            navigate(`/live-stream-room/${stream._id}`);
                           }}
                         />
                         <span className="view-count">
@@ -300,7 +300,7 @@ const HomePage = () => {
                               <span className="stream-title">
                                 <strong
                                   onClick={() => {
-                                    navigate(`/room/${stream._id}`);
+                                    navigate(`/live-stream-room/${stream._id}`);
                                   }}
                                 >
                                   {stream.title}

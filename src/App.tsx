@@ -15,6 +15,7 @@ import Search from "./pages/search";
 import AdvanceSearch from "./pages/advance-search";
 import ResetPassword from "./pages/resetPassword";
 import ForgetPassword from "./pages/forget-password";
+import RoomPage from "./pages/live-stream-room/RoomPage";
 
 const HomePage = lazy(() => import("./pages/home/index"));
 
@@ -44,9 +45,13 @@ function App() {
           path: "/category/:category",
           element: <Category />,
         },
+        // {
+        //   path: "room/:id",
+        //   element: <LiveStream />,
+        // },
         {
-          path: "room/:id",
-          element: <LiveStream />,
+          path: "/live-stream-room/:id",
+          element: <RoomPage />,
         },
         {
           path: "/search/:searchQuery",

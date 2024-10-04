@@ -10,7 +10,6 @@ const LikeButton = ({ streamId, userId, likeCount, like }) => {
   const [likedCount, setLikedCount] = useState(likeCount);
 
   const handleClick = async () => {
-    console.log(likedCount);
     if (liked) {
       setLikedCount(likedCount - 1);
       const response = await api.post(`streams/${streamId}/${userId}/dislike`);
